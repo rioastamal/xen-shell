@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.13 $';
+my $VERSION   = '$Revision: 1.14 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -29,19 +29,10 @@ my $USER = getpwuid( $REAL_USER_ID );
 
 
 #
-#  Make sure we have libterm-readline-gnu installed.
+# Sanity check our host and user.
 #
-BEGIN {
-    eval {
-        require Term::ReadLine;
-    };
-};
-if ( $@ )
-{
-    print "Package 'Term::ReadLine' not installed.\n";
-    print "Aborting\n";
-    exit;
-}
+sanityCheck();
+
 
 
 
@@ -139,6 +130,53 @@ while ( defined (my $line = $term->readline('xen-shell> ')) )
 exit;
 
 
+
+
+=head2 sanityCheck
+
+ Sanity check that we can load the modules we require, and also make sure
+the current user has a xen guest on this host machine.
+
+=cut
+
+sub sanityCheck
+{
+    #
+    #  Test we have the perl modules we need.
+    #
+    BEGIN {
+        eval {
+            require Term::ReadLine;
+            require Term::ReadLine::Gnue;
+        };
+    };
+    if ( $@ )
+    {
+        print "Package 'Term::ReadLine' not installed.\n";
+        print "Aborting\n";
+        exit;
+    }
+
+    #
+    #  Test that the current user has a sane name
+    #
+    if ( $USER !~ /^([a-zA-Z]+)$/ )
+    {
+        print "User $USER contains non-alphabetical characters\n";
+        print "Aborting\n";
+        exit;
+    }
+
+    #
+    #  Test that the user has a Xen guest
+    #
+    if ( ! -e "/etc/xen/$USER.cfg" )
+    {
+        print "User '$USER' doesn't have a Xen guest on this host.\n";
+        print "Aborting\n";
+        exit;
+    }
+}
 
 
 
