@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.14 $';
+my $VERSION   = '$Revision: 1.15 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -26,14 +26,6 @@ if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 # Use this form to make sure even when running under sudo, etc, it works.
 #
 my $USER = getpwuid( $REAL_USER_ID );
-
-
-#
-# Sanity check our host and user.
-#
-sanityCheck();
-
-
 
 
 #
@@ -73,61 +65,40 @@ my %help =
     "shutdown" => "Shut down the Xen guest.",
    );
 
+
+
+
+
+
+#
+# Sanity check our host and user.
+#
+sanityCheck();
+
+
+#
+# Show our shell banner.
+#
+showBanner();
+
+
 #
 #  Create the readline interface.
 #
-my $term = new Term::ReadLine 'xen-shell';
+my $term = createTerm();
 
 
 #
-# Show a greeting:
+#  Run our command loop.
 #
-print "xen-shell v$VERSION - type 'help' for help\n";
+runMainLoop( $term );
 
-#
-#  Add completion
-#
-my $attribs = $term->Attribs;
-$attribs->{completion_entry_function} = $attribs->{list_completion_function};
-$attribs->{completion_word}           = \@cmds;
 
 #
-#  Command loop.
-#
-while ( defined (my $line = $term->readline('xen-shell> ')) )
-{
-    # Exit immediately
-    exit if ( $line =~ /^(quit|exit)/i );
-
-    # Ignore empty lines.
-    next if ( !length( $line ) );
-
-    # Strip leading and trailing whitespace.
-    $line =~ s/^\s+//;
-    $line =~ s/\s+$//;
-
-    # If we have arguements then split them up.
-    my ($word, $args) = split( /[ \t]/, $line );
-
-    # Lookup command in our dispatch table.
-    if ( $dispatch{ lc $word } )
-    {
-        # Call the function with any arguments we might have.
-        $dispatch{lc $word}->( $args );
-
-        # Add this successful command to our history.
-        $term->addhistory( $line );
-    }
-    else
-    {
-        print "Unknown command: '$word' - type 'help' for help.\n";
-    }
-}
-
-#
-#  NOT REACHED.
+#  Never reached
 #
 exit;
+
 
 
 
@@ -177,6 +148,99 @@ sub sanityCheck
         exit;
     }
 }
+
+
+
+=head2 showBanner
+
+ Show the banner of this shell - used when we start up.
+
+=cut
+
+sub showBanner
+{
+    print "xen-shell v$VERSION - type 'help' for help\n";
+}
+
+
+
+=head2 createTerm
+
+  Create the terminal interface, complete with command completion.
+
+=cut
+
+sub createTerm
+{
+    my $term = new Term::ReadLine 'xen-shell';
+
+    #
+    #  Add completion
+    #
+    my $attribs = $term->Attribs;
+    $attribs->{completion_entry_function} =
+      $attribs->{list_completion_function};
+    $attribs->{completion_word}           = \@cmds;
+
+    #
+    #  Return it
+    #
+    return( $term );
+}
+
+
+
+=head2 runMainLoop
+
+  Run the input reading + dispatching loop.   We use the dispatch
+ table already defined to handle input.
+
+  Parsing of command line input is extremely minimal - we break the
+ input line into "word" which is the first whitespace deliminated
+ token on the line and "args" which is the remainder of the line.
+
+  This is sufficient for our purposes.
+
+=cut
+
+sub runMainLoop
+{
+    my ( $term ) = ( @_ );
+
+    #
+    #  Command loop.
+    #
+    while ( defined (my $line = $term->readline('xen-shell> ')) )
+    {
+        # Exit immediately
+        exit if ( $line =~ /^(quit|exit)/i );
+
+        # Ignore empty lines.
+        next if ( !length( $line ) );
+
+        # Strip leading and trailing whitespace.
+        $line =~ s/^\s+//;
+        $line =~ s/\s+$//;
+
+        # If we have arguements then split them up.
+        my ($word, $args) = split( /[ \t]/, $line );
+
+        # Lookup command in our dispatch table.
+        if ( $dispatch{ lc $word } )
+        {
+            # Call the function with any arguments we might have.
+            $dispatch{lc $word}->( $args );
+
+            # Add this successful command to our history.
+            $term->addhistory( $line );
+        }
+        else
+        {
+            print "Unknown command: '$word' - type 'help' for help.\n";
+        }
+    }
+}
+
 
 
 
