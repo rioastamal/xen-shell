@@ -16,12 +16,14 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.10 $';
+my $VERSION   = '$Revision: 1.11 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
 #
-# Get the username which is currently running the software.
+# Get the username of the person who is currently running the software.
+#
+# Use this form to make sure even when running under sudo, etc, it works.
 #
 my $USER = getpwuid( $REAL_USER_ID );
 
@@ -44,6 +46,43 @@ if ( $@ )
 
 
 #
+#  Dispatch table which contains the mappings between the commands
+# we make available and the routine which implements that behaviour.
+#
+my %dispatch =
+   (
+    "console"  => \&do_console,
+    "serial"   => \&do_console,
+    "uptime"   => \&show_uptime,
+    "status"   => \&show_status,
+    "boot"     => \&do_boot,
+    "shutdown" => \&do_shutdown,,
+    "reboot"   => \&do_reboot,
+    "help"     => \&show_help,
+   );
+
+#
+#  This array is used to setup the command completion.
+#
+my @cmds = keys %dispatch;
+
+
+#
+#  Help text
+#
+my %help =
+   (
+    "help" => "Show help about the specified command, or all commands.",
+    "console" => "Connect to the serial console of the Xen instance using GNU Screen.\nTo exit the serial prompt type Ctrl+], or exit screen with Ctrl+a k, or Ctrl+a d.",
+    "serial" => "Connect to the serial console of the Xen instance using GNU Screen.\nTo exit the serial prompt type Ctrl+], or exit screen with Ctrl+a k, or Ctrl+a d.",
+    "uptime" => "Show the uptime of the current host",
+    "status" => "Show whether the instance is running or not",
+    "boot" => "Start the Xen guest, if it is not running.",
+    "reboot" => "Reboot the Xen guest.",
+    "shutdown" => "Shut down the Xen guest.",
+   );
+
+#
 #  Create the readline interface.
 #
 my $term = new Term::ReadLine 'xen-shell';
@@ -58,9 +97,8 @@ print "xen-shell v$VERSION - type 'help' for help\n";
 #  Add completion
 #
 my $attribs = $term->Attribs;
-$attribs->{completion_entry_function} =  $attribs->{list_completion_function};
-$attribs->{completion_word} = [qw/help uptime status shutdown boot reboot serial console exit quit/ ];
-#$term->readline("custom completion>");
+$attribs->{completion_entry_function} = $attribs->{list_completion_function};
+$attribs->{completion_word}           = \@cmds;
 
 #
 #  Command loop.
@@ -77,43 +115,19 @@ while ( defined (my $line = $term->readline('xen-shell> ')) )
     $line =~ s/^\s+//;
     $line =~ s/\s+$//;
 
-    if ( $line =~ /^uptime/i )
+    # If we have arguements then split them up.
+    my ($word, $args) = split( /[ \t]/, $line );
+
+    # Lookup command in our dispatch table.
+    if ( $dispatch{ lc $word } )
     {
-        show_uptime();
-    }
-    elsif ( $line =~ /^status/i )
-    {
-        show_status();
-    }
-    elsif ( $line =~ /^help/i )
-    {
-        show_help();
-    }
-    elsif ( $line =~ /boot/i )
-    {
-        do_boot();
-    }
-    elsif ( $line =~ /^shutdown/i )
-    {
-        do_shutdown();
-    }
-    elsif ( $line =~ /^reboot/i )
-    {
-        do_reboot();
-    }
-    elsif ( $line =~ /^(serial|console)/i )
-    {
-        do_console();
+        $dispatch{lc $word}->( $args );
+        $term->addhistory( $line );
     }
     else
     {
-        print "Unknown command: '$line' - type 'help' for help.\n";
+        print "Unknown command: '$word' - type 'help' for help.\n";
     }
-
-    #
-    #  Add the line to the history
-    #
-    $term->addhistory( $line );
 }
 
 exit;
@@ -175,6 +189,18 @@ sub show_status
 
 sub show_help
 {
+    my ( $term ) = ( @_ );
+
+    #
+    #  Help on a single command
+    #
+    if ( defined( $term ) )
+    {
+        print "\nCommand: $term\n";
+        print $help{ lc $term };
+        print "\n";
+        return;
+    }
     print <<E_O_HELP;
 
 xen-shell v$VERSION
@@ -188,8 +214,9 @@ The following commands are available within this shell:
   shutdown  Shut down your Xen guest instance.
   reboot    Reboot your Xen guest instance.
 
-
   console   Gain access to your Xen guest via the serial console.
+
+  For help on each command enter "help command".
 
 E_O_HELP
 }
