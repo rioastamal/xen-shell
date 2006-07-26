@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+#  Invoke screen with some sane options so that we can allow
+# the user to connect to a Xen console safely.
+#
+#  Use "^l" rather than "^a" to avoid clashes.
+#
+# Steve
+# --
+
+
+
+#
+#  Options we use:
+#
+# -c file
+#   Override the default configuration file from "$HOME/.screenrc" to file
+#
+# -d -R
+#   Reattach a session and if necessary detach or even create it first.
+#
+# -s
+#   set the login shell
+#   
+# -S
+#   set the title of this screen
+#
+
+screen -d -R -c _screenrc -e^Aa -s xm-console  -S $USER
+

@@ -1,0 +1,192 @@
+#!/usr/bin/perl
+#
+# Provide a simple command line shell program which can be used as
+# the login shell for a Xen user.
+#
+# This provides basic abilities for the user to control their instance.
+#
+# Steve
+# --
+#
+
+use strict;
+use warnings;
+use English;
+
+#
+# Get the username which is currently running the software.
+#
+my $USER = getpwuid( $REAL_USER_ID );
+
+
+#
+#  Make sure we have libterm-readline-gnu installed.
+#
+BEGIN {
+    eval {
+        require Term::ReadLine;
+    };
+};
+if ( $@ )
+{
+    print "Package 'Term::ReadLine' not installed.\n";
+    print "Aborting\n";
+    exit;
+}
+
+
+
+#
+#  Create the readline interface.
+#
+my $term = new Term::ReadLine 'xen-shell';
+
+
+
+#
+#  Add completion
+#
+my $attribs = $term->Attribs;
+$attribs->{completion_entry_function} =  $attribs->{list_completion_function};
+$attribs->{completion_word} = [qw/help uptime status shutdown boot reboot console exit quit/ ];
+#$term->readline("custom completion>");
+
+#
+#  Command loop.
+#
+while ( defined (my $line = $term->readline('xen-shell> ')) )
+{
+    exit if ( $line =~ /^(quit|exit)/i );
+
+    if ( $line =~ /^uptime/i )
+    {
+        show_uptime();
+    }
+    elsif ( $line =~ /^status/i )
+    {
+        show_status();
+    }
+    elsif ( $line =~ /^help/i )
+    {
+        show_help();
+    }
+    elsif ( $line =~ /boot/i )
+    {
+        do_boot();
+    }
+    elsif ( $line =~ /^shutdown/i )
+    {
+        do_shutdown();
+    }
+    elsif ( $line =~ /^reboot/i )
+    {
+        do_reboot();
+    }
+    elsif ( $line =~ /console/i )
+    {
+        do_console();
+    }
+    else
+    {
+        print "Unknown command: '$line'\n";
+    }
+}
+
+exit;
+
+
+
+=head2 show_uptime
+
+  Show uptime of the guest.
+
+=cut
+sub show_uptime
+{
+    my $host_uptime = `uptime`;
+    chomp( $host_uptime );
+
+    print "Host : $host_uptime\n";
+}
+
+
+=head2 show_status
+
+  Show status of the guest system:  Running/Shutdown
+
+=cut
+
+sub show_status
+{
+    my $running = 0;
+
+    #
+    # See if the instance is running
+    #
+    my $cmd = "xm list $USER 2>/dev/null | grep $USER";
+    my $out = `$cmd`;
+
+    if ( length( $out ) )
+    {
+        $running = 1;
+    }
+
+    if ( $running )
+    {
+        print "Running\n";
+    }
+    else
+    {
+        print "Shutdown\n";
+    }
+    show_uptime();
+}
+
+
+=sub show_help
+
+  Show the user some help
+
+=cut
+
+sub show_help
+{
+    print <<E_O_HELP;
+
+The following commands are available by this shell:
+
+  status    Show your machines status.
+  uptime    Show the uptime information of the host system.
+
+  boot      Boot up your xen guest instance
+  shutdown  Shut down your Xen guest instance
+  reboot    Reboot your Xen guest instance
+
+
+  console   Gain access to your Xen guest via the serial console
+
+E_O_HELP
+}
+
+
+
+sub do_reboot
+{
+    print "Rebooting instance: $USER\n";
+}
+
+sub do_shutdown
+{
+    print "Shutting down instance: $USER\n";
+}
+
+sub do_boot
+{
+    print "Bootng instance: $USER\n";
+}
+
+sub do_console
+{
+    print "Running console\n";
+    system( "screen" );
+}

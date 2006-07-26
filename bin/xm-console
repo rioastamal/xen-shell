@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+#  Connect to the console of the Xen host with the same name as the
+# current login name.
+#
+#  We use `whoami` because if we used ${USER} then it could be spoofed.
+#
+# Steve
+# -- 
+#
+
+sudo xm console `whoami`
