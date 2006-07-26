@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.8 $';
+my $VERSION   = '$Revision: 1.9 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -147,7 +147,7 @@ sub show_status
     #
     # See if the instance is running
     #
-    my $cmd = "xm list $USER 2>/dev/null | grep $USER";
+    my $cmd = "sudo xm list $USER 2>/dev/null | grep $USER";
     my $out = `$cmd`;
 
     if ( length( $out ) )
