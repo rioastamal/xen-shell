@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.7 $';
+my $VERSION   = '$Revision: 1.8 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -218,5 +218,5 @@ sub do_boot
 sub do_console
 {
     print "Running console for $USER\n";
-    system( "screen" );
+    system( "xen-console" );
 }
