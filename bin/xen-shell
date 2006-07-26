@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.12 $';
+my $VERSION   = '$Revision: 1.13 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -121,7 +121,10 @@ while ( defined (my $line = $term->readline('xen-shell> ')) )
     # Lookup command in our dispatch table.
     if ( $dispatch{ lc $word } )
     {
+        # Call the function with any arguments we might have.
         $dispatch{lc $word}->( $args );
+
+        # Add this successful command to our history.
         $term->addhistory( $line );
     }
     else
@@ -130,7 +133,12 @@ while ( defined (my $line = $term->readline('xen-shell> ')) )
     }
 }
 
+#
+#  NOT REACHED.
+#
 exit;
+
+
 
 
 
@@ -139,11 +147,11 @@ exit;
   Show uptime of the guest.
 
 =cut
+
 sub show_uptime
 {
     my $host_uptime = `uptime`;
     chomp( $host_uptime );
-
     print "Host : $host_uptime\n";
 }
 
@@ -163,12 +171,11 @@ sub show_status
     #
     my $cmd = "sudo xm list $USER 2>/dev/null | grep $USER";
     my $out = `$cmd`;
+    if ( length( $out ) ) { $running = 1; }
 
-    if ( length( $out ) )
-    {
-        $running = 1;
-    }
-
+    #
+    # Show state.
+    #
     if ( $running )
     {
         print "Guest: Running\n";
@@ -177,8 +184,8 @@ sub show_status
     {
         print "Guest: Shutdown\n";
     }
-    show_uptime();
 }
+
 
 
 =sub show_help
@@ -222,6 +229,11 @@ E_O_HELP
 }
 
 
+=head2 do_reboot
+
+  Reboot the instance.
+
+=cut
 
 sub do_reboot
 {
@@ -229,11 +241,25 @@ sub do_reboot
     system( "sudo xm reboot $USER" );
 }
 
+
+=head2 do_shutdown
+
+  Shutdown the instance.
+
+=cut
+
 sub do_shutdown
 {
     print "Shutting down instance: $USER\n";
     system( "sudo xm shutdown $USER" );
 }
+
+
+=head2 do_boot
+
+  Start the instance.
+
+=cut
 
 sub do_boot
 {
@@ -241,6 +267,13 @@ sub do_boot
     system( "sudo xm create $USER.cfg" );
     print "Use 'console' to see the bootup messages.\n";
 }
+
+
+=head2 do_console
+
+  Run GNU Screen with the console output of Xen.
+
+=cut
 
 sub do_console
 {
