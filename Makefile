@@ -14,7 +14,9 @@ clean:
 
 install:
 	if [ ! -d /usr/local/bin ]; then mkdir /usr/local/bin ; fi
-	cp bin/* /usr/local/bin
+	cp bin/xm-console /usr/local/bin
+	cp bin/xen-console /usr/local/bin
+	cp bin/xen-shell /usr/local/bin
 	if [ ! -d /usr/local/etc ]; then mkdir /usr/local/etc ; fi
 	cp misc/_screenrc /usr/local/etc
 
