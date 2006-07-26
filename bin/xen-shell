@@ -14,6 +14,13 @@ use warnings;
 use English;
 
 #
+#  Version number
+#
+my $VERSION   = '$Revision: 1.3 $';
+if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
+
+
+#
 # Get the username which is currently running the software.
 #
 my $USER = getpwuid( $REAL_USER_ID );
@@ -42,6 +49,10 @@ if ( $@ )
 my $term = new Term::ReadLine 'xen-shell';
 
 
+#
+# Show a greeting:
+#
+print "xen-shell v$VERSION - type 'help' for help\n";
 
 #
 #  Add completion
@@ -56,7 +67,15 @@ $attribs->{completion_word} = [qw/help uptime status shutdown boot reboot consol
 #
 while ( defined (my $line = $term->readline('xen-shell> ')) )
 {
+    # Exit immediately
     exit if ( $line =~ /^(quit|exit)/i );
+
+    # Ignore empty lines.
+    next if ( !length( $line ) );
+
+    # Strip leading and trailing whitespace.
+    $line =~ s/^\s+//;
+    $line =~ s/\s+$//;
 
     if ( $line =~ /^uptime/i )
     {
@@ -88,8 +107,13 @@ while ( defined (my $line = $term->readline('xen-shell> ')) )
     }
     else
     {
-        print "Unknown command: '$line'\n";
+        print "Unknown command: '$line' - type 'help' for help.\n";
     }
+
+    #
+    #  Add the line to the history
+    #
+    $term->addhistory( $line );
 }
 
 exit;
@@ -153,14 +177,16 @@ sub show_help
 {
     print <<E_O_HELP;
 
-The following commands are available by this shell:
+xen-shell v$VERSION
+
+The following commands are available within this shell:
 
   status    Show your machines status.
   uptime    Show the uptime information of the host system.
 
-  boot      Boot up your xen guest instance
-  shutdown  Shut down your Xen guest instance
-  reboot    Reboot your Xen guest instance
+  boot      Boot up your xen guest instance.
+  shutdown  Shut down your Xen guest instance.
+  reboot    Reboot your Xen guest instance.
 
 
   console   Gain access to your Xen guest via the serial console
