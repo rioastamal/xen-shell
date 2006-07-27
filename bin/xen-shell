@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.16 $';
+my $VERSION   = '$Revision: 1.17 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -88,6 +88,12 @@ showBanner();
 #  Create the readline interface.
 #
 my $term = createTerm();
+
+
+#
+#  Load command history.
+#
+loadHistory( $term );
 
 
 #
@@ -189,6 +195,29 @@ sub createTerm
     #
     return( $term );
 }
+
+
+
+=head2 loadHistory
+
+  If the user has a xen-shell history load it up.
+
+=cut
+
+sub loadHistory
+{
+    my ( $term ) = ( @_ );
+
+    #
+    #  Load the file.
+    #
+    my $file = $ENV{'HOME'} . "/" . ".xen-shell";
+    if ( -e $file )
+    {
+        $term->ReadHistory( $file );
+    }
+}
+
 
 
 
@@ -391,5 +420,9 @@ sub do_console
 
 sub do_exit
 {
+    my $file = $ENV{'HOME'} . "/" . ".xen-shell";
+
+    $term->WriteHistory( $file );
+
     exit;
 }
