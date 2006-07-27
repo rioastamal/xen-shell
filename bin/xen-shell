@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.15 $';
+my $VERSION   = '$Revision: 1.16 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -39,9 +39,11 @@ my %dispatch =
     "uptime"   => \&show_uptime,
     "status"   => \&show_status,
     "boot"     => \&do_boot,
-    "shutdown" => \&do_shutdown,,
+    "shutdown" => \&do_shutdown,
     "reboot"   => \&do_reboot,
     "help"     => \&show_help,
+    "exit"     => \&do_exit,
+    "quit"     => \&do_exit,
    );
 
 #
@@ -55,18 +57,18 @@ my @cmds = keys %dispatch;
 #
 my %help =
    (
-    "help" => "Show help about the specified command, or all commands.",
-    "console" => "Connect to the serial console of the Xen instance using GNU Screen.\nTo exit the serial prompt type Ctrl+], or exit screen with Ctrl+a k, or Ctrl+a d.",
-    "serial" => "Connect to the serial console of the Xen instance using GNU Screen.\nTo exit the serial prompt type Ctrl+], or exit screen with Ctrl+a k, or Ctrl+a d.",
-    "uptime" => "Show the uptime of the current host",
-    "status" => "Show whether the instance is running or not",
     "boot" => "Start the Xen guest, if it is not running.",
+    "console" => "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
+    "exit" => "Exit this shell.",
+    "help" => "Show help about the specified command, or all commands.",
     "reboot" => "Reboot the Xen guest.",
     "shutdown" => "Shut down the Xen guest.",
+    "status" => "Show whether the instance is running or not",
+    "uptime" => "Show the uptime of the current host",
    );
 
-
-
+$help{'serial'} = $help{'console'};
+$help{'quit'}   = $help{'exit'};
 
 
 
@@ -159,7 +161,7 @@ sub sanityCheck
 
 sub showBanner
 {
-    print "xen-shell v$VERSION - type 'help' for help\n";
+    print "xen-shell v$VERSION - type 'help' for help.\n";
 }
 
 
@@ -212,9 +214,6 @@ sub runMainLoop
     #
     while ( defined (my $line = $term->readline('xen-shell> ')) )
     {
-        # Exit immediately
-        exit if ( $line =~ /^(quit|exit)/i );
-
         # Ignore empty lines.
         next if ( !length( $line ) );
 
@@ -305,7 +304,7 @@ sub show_help
     #
     if ( defined( $term ) )
     {
-        print "\nCommand: $term\n";
+        print "\nCommand: $term\n\n";
         print $help{ lc $term };
         print "\n";
         return;
@@ -316,16 +315,16 @@ xen-shell v$VERSION
 
 The following commands are available within this shell:
 
-  status    Show your machines status.
+  boot      Boot your Xen guest.
+  console   Gain access to your Xen guest via the serial console.
+  exit      Exit this shell.
+  help      Show general, or command-specific, help information.
+  reboot    Reboot your Xen guest.
+  shutdown  Shut down your Xen guest.
+  status    Show the status of your Xen guest.
   uptime    Show the uptime information of the host system.
 
-  boot      Boot up your xen guest instance.
-  shutdown  Shut down your Xen guest instance.
-  reboot    Reboot your Xen guest instance.
-
-  console   Gain access to your Xen guest via the serial console.
-
-  For help on each command enter "help command".
+  For command-specific help run "help command".
 
 E_O_HELP
 }
@@ -381,4 +380,16 @@ sub do_console
 {
     print "Running console for $USER\n";
     system( "xen-console" );
+}
+
+
+=head2 do_exit
+
+ Exit this shell
+
+=cut
+
+sub do_exit
+{
+    exit;
 }
