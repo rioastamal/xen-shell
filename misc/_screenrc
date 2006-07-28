@@ -1,4 +1,4 @@
-# $Id: _screenrc,v 1.2 2006-07-26 10:47:58 steve Exp $
+# $Id: _screenrc,v 1.3 2006-07-28 22:52:14 steve Exp $
 #
 # /etc/screenrc
 #
@@ -57,3 +57,5 @@ termcapinfo xterm*|linux*|rxvt*|Eterm* OP
 termcapinfo xterm 'is=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;4;6l'
 
 shelltitle "Xen Console"
+
+wall "Xen Console Starting .. please wait .."
