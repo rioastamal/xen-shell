@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.18 $';
+my $VERSION   = '$Revision: 1.19 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -30,59 +30,60 @@ my $USER = getpwuid( $REAL_USER_ID );
 
 #
 #  Dispatch table which contains the mappings between the commands
-# we make available and the routine which implements that behaviour.
+# we make available and the routine which implements that behaviour and
+# the help text to show.
 #
-#  We also store the help text here too.
+#  This is a hash of hashes.  Obviously.
 #
-my @dispatch =
+my %dispatch =
 (
+   "boot" =>
      {
-        cmd => "boot",
         sub => \&do_boot,
        help => "Start the Xen guest, if it is not running.",
      },
+   "console" =>
      {
-        cmd => "console",
         sub => \&do_console,
        help => "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
      },
+   "exit" =>
      {
-        cmd => "exit",
         sub => \&do_exit,
        help => "Exit this shell.",
      },
+   "help" =>
      {
-        cmd => "help",
         sub => \&show_help,
        help => "Show help about the specified command, or all commands.",
      },
+  "quit" =>   # Dupe: exit
      {
-        cmd => "quit",
         sub => \&do_exit,
        help => "Exit this shell.",
      },
+   "reboot" =>
      {
-        cmd => "reboot",
         sub => \&do_reboot,
        help => "Reboot the Xen guest.",
      },
+   "serial" => # Dupe: console
      {
-        cmd => "serial",           # duplicate.
         sub => \&do_console,
        help => "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
      },
+   "shutdown" =>
      {
-        cmd => "shutdown",
         sub => \&do_shutdown,
        help => "Shutdown the Xen guest.",
      },
+   "status" =>
      {
-        cmd => "status",
         sub => \&show_status,
         help => "Show whether the Xen guest is running or not.",
      },
+   "uptime" =>
      {
-        cmd => "uptime",
         sub => \&show_uptime,
         help => "Show the uptime of the host system.",
      },
@@ -145,12 +146,12 @@ sub sanityCheck
     BEGIN {
         eval {
             require Term::ReadLine;
-            require Term::ReadLine::Gnue;
+            require Term::ReadLine::Gnu;
         };
     };
     if ( $@ )
     {
-        print "Package 'Term::ReadLine' not installed.\n";
+        print "Package 'Term::ReadLine::Gnu' not installed.\n";
         print "Aborting\n";
         exit;
     }
@@ -206,10 +207,9 @@ sub createTerm
     # are available.
     #
     my @cmds = ();
-    foreach my $key ( @dispatch )
+    foreach my $cmd ( keys %dispatch )
     {
-        my $c = $key->{'cmd'};
-        push @cmds, $c;
+        push @cmds, $cmd;
     }
 
     #
@@ -283,30 +283,19 @@ sub runMainLoop
         my ($word, $args) = split( /[ \t]/, $line );
 
         # Lookup command in our dispatch table.
-        my $found = 0;
-        foreach my $key ( @dispatch )
-        {
-            # Get the word.
-            my $c = $key->{'cmd'};
-            if ( lc($c) eq lc( $word ) )
-            {
-                # Call the function with any arguments we might have.
-                $key->{'sub'}->( $args );
+        my $cmd = $dispatch{ lc( $word ) };
 
-                # Record the success
-                $found += 1;
-            }
-        }
-
-        if ( $found < 1 )
+        if ( $cmd )
         {
-            print "Unknown command: '$word' - type 'help' for help.\n";
+            # Call the function with any arguments we might have.
+            $cmd->{'sub'}->( $args );
+
+            # Add a successful line to our history
+            $term->add_history( $line );
         }
         else
         {
-            # Add a successful line to our history
-            $term->add_history( $line );
-
+            print "Unknown command: '$word' - type 'help' for help.\n";
         }
     }
 }
@@ -376,15 +365,18 @@ sub show_help
     if ( defined( $term ) )
     {
         print "\nCommand: $term\n\n";
-        foreach my $entry ( @dispatch )
+
+        # Lookup command in our dispatch table.
+        my $cmd = $dispatch{ lc( $term ) };
+        if ( $cmd )
         {
-            if ( lc($entry->{'cmd'}) eq lc($term) )
-            {
-                print $entry->{'help'};
-                print "\n";
-                return;
-            }
+            print $cmd->{'help'} . "\n";
         }
+        else
+        {
+            print "Unknown command '$term' - no help text available\n";
+        }
+        return;
     }
 
     print <<E_O_HELP;
