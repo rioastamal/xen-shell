@@ -16,7 +16,7 @@ use English;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.20 $';
+my $VERSION   = '$Revision: 1.21 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -66,6 +66,11 @@ my %dispatch =
      {
         sub => \&do_reboot,
        help => "Reboot the Xen guest.",
+     },
+   "reimage" =>
+     {
+        sub => \&do_reimage,
+       help => "Erase your Xen guest and reinitialise it to a fresh installation of Sarge.",
      },
    "serial" => # Dupe: console
      {
@@ -411,6 +416,41 @@ sub do_reboot
     print "Rebooting instance: $USER\n";
     system( "sudo xm reboot $USER" );
 }
+
+
+
+=head2 do_reimage
+
+  Allow the machine to be reinitialised to a fresh installation of 
+ Sarge.
+
+=cut
+
+sub do_reimage
+{
+    print "Reimagine instance: $USER\n";
+
+    #
+    # See if the instance is running
+    #
+    my $running = 0;
+    my $cmd = "sudo xm list $USER 2>/dev/null | grep $USER";
+    my $out = `$cmd`;
+    if ( length( $out ) )
+    {
+        print "Xen guest running.\n";
+        print "Please run 'shutdown' first\n";
+        return;
+    }
+    else
+    {
+        print "Machine not running, proceeding\n";
+    }
+
+    system( "/usr/local/bin/xm-reimage $USER" );
+    print "You may now boot your installation\n";
+}
+
 
 
 =head2 do_shutdown
