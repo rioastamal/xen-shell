@@ -62,3 +62,8 @@ for i in `seq 1 10`; do
 done
 echo -e "\nCommitted."
 
+
+#
+#  Run the reimage script.
+#
+system( "/home/$USER/image.sh" );
