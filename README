@@ -3,8 +3,12 @@
 xen-shell
 ---------
 
-  This package contains a simple script called 'xen-shell' which is
+  This package contains a simple script called 'xen-login-shell' which is
  designed to be a login shell for a user on a Xen host.
+
+  This new login shell runs 'xen-shell', which is the real shell, under
+ GNU screen.  This allows people to work on their system safely even
+ in the case of disconnections.
 
   There are several commands available within this shell which will
  allow the user to control their Xen guest instance.
@@ -23,12 +27,12 @@ xen-shell
 Notes
 -----
 
-  We have to do some special magic for the console access since to  
+  We have to do some special magic for the console access since to
  run the Xen console you need to execute, as root, "xm console id".
 
-  We setup the shell environment of GNU Screen to be a simple script
- because screen only allows a single binary to be setup as the shell,
- not the full "xm console ..." command and arguments.
+  We setup the shell environment of GNU Screen to be the xen-shell
+ script, and attempt to limit the full abilities so that users cannot
+ break out into general host access.
 
   GNU Screen has several abilities to "break out", I've disabled all
  the ones I can spot.  There may be holes.
@@ -40,7 +44,7 @@ Installation
   sudo make install
 
   Once installed set each user who you wish to control a Xen instance
- to have their shell as /usr/local/bin/xen-shell.
+ to have their shell as /usr/local/bin/xen-login-shell.
 
   You'll need to ensure that these users can run "xm" as root with
  no password, via sudo:
