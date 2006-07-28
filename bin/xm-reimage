@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+#  Reimage the current machine.
+#
+
+
+#
+#  Get the machine we're imaging.
+#
+host=$1
+if [ -z "${host}" ]; then
+    echo "Usage:  $0 host"
+    exit
+fi
+
+
+clear
+cat <<EOF
+
+ WARNING!!!
+
+ This process will completely reset your Xen guest to a fresh installation
+of Debian GNU/Linux.
+
+ ALL OF YOUR DATA WILL BE LOST
+
+ If you wish to proceed please enter the following text exactly:
+
+-
+I wish to reimage ${host}
+-
+
+EOF
+
+
+read input
+if [  "${input}" != "I wish to reimage ${host}" ]; then
+    clear
+    echo "Your changed your mind"
+    echo "Sensible choice"
+    echo " "
+    exit;
+fi
+
+
+#
+#  Give a final choice to bail out
+#
+clear
+cat <<EOF
+
+  Image recreation and wiping confirmed.
+
+  Sleeping for 10 seconds to give you one last chance to abort:
+
+EOF
+
+echo -n " "
+for i in `seq 1 10`; do 
+    echo -n "${i} "
+    sleep 1
+done
+echo -e "\nCommitted."
+
