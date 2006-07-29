@@ -54,7 +54,8 @@ Installation
 ---
 User_Alias   XENUSERS = steve,nsa,grimoire,joey
 Cmnd_Alias   XEN      = /usr/sbin/xm
-XENUSERS     ALL      = NOPASSWD: XEN
+Cmnd_Alias   XENIMG   = /usr/bin/xen-create-image
+XENUSERS     ALL      = NOPASSWD: XEN,XENIMG
 ---
 
 
