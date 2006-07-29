@@ -19,6 +19,7 @@ xen-shell
   * Bootup.
   * Reboot.
   * Console access.
+  * Reimaging.
 
   This shell supports integrated help, along with command history,
  and command completion.
@@ -27,15 +28,20 @@ xen-shell
 Notes
 -----
 
-  We have to do some special magic for the console access since to
- run the Xen console you need to execute, as root, "xm console id".
-
   We setup the shell environment of GNU Screen to be the xen-shell
  script, and attempt to limit the full abilities so that users cannot
  break out into general host access.
 
   GNU Screen has several abilities to "break out", I've disabled all
  the ones I can spot.  There may be holes.
+
+  The reimaging support isn't fully integrated, so for every user
+ you wish to allow reimaging you will need to create:
+
+        /home/$USER/image.sh
+
+  This script will be invoked to do the job after waiting for confirmation.
+  The script probably just needs to execute xen-create-image appropriately...
 
 
 Installation
