@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+#  This is a simple helper script which will allow you to setup a new
+# Xen-aware user.
+#
+# Steve
+# --
+# $Id: xen-add-user,v 1.1 2006-08-01 00:04:06 steve Exp $
+#
+
+
+
+#
+#  Get the user we're to add
+#
+user=$1
+if [ -z "${user}" ]; then       
+    echo "Usage: xen-add-user username"
+    exit
+fi
+
+#
+#  Add the system user if it isn't already present
+#
+echo "Creating new Unix user ${user}"
+if ( grep ${user} /etc/passwd > /dev/null ) ; then
+    echo "Warning user ${user} already exists in the passwd file."
+    echo "Press return to proceed, or Ctrl-c to cancel"
+    read
+else
+    /usr/sbin/useradd "${user}"
+fi
+
+#
+#  Make a home directory
+#
+echo "Making home directory for ${user}"
+if [ -d "/home/${user}" ]; then
+    echo "Home directory already present.  Weird"
+else
+    mkdir "/home/${user}"
+fi
+
+
+#
+#  Create an SSH login key, so they can access the xen-shell
+#
+echo "Creating SSH key"
+ su -c "ssh-keygen -t dsa" ${user}
+
+
+#
+#  Change the shell
+#
+echo "Changing login shell for ${user}"
+chsh -s /usr/local/bin/xen-login-shell "${user}"
+
+
+#
+#  Create the reimage script
+#
+echo "Creating reimage script - NOTE YOU MUST UPDATE THIS"
+cat >/home/${user}/image.sh<<EOF
+#!/bin/sh
+#
+xen-create-image --hostname=${user} --size=10G --memory=256 --swap=256 --fs=ext3 --dist=sarge --mirror=http://mirror.bytemark.co.uk/debian --gateway=xx.xx.xx.xx --broadcast=xx.xx.xx.xx --ip=xx.xx.xx.xx --ip=xx.xx.xx.xx --lvm=xh
+EOF
+chmod 755 /home/${user}/image.sh
+
+
+#
+#  Change the ownership of the new home directory.
+#
+chown -R ${user}:users "/home/${user}"
+
+#
+#  Warning
+#
+cat <<EOF
+
+   Dont forget to update /etc/sudoers :
+
+User_Alias   XENUSERS = user1, user2, user3, ...
+Cmnd_Alias   XEN      = /usr/sbin/xm
+Cmnd_Alias   XENIMG   = /usr/bin/xen-create-image
+XENUSERS     ALL      = NOPASSWD: XEN,XENIMG
+
+EOF
