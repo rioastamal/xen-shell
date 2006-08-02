@@ -19,7 +19,6 @@ diff:
 
 install:
 	if [ ! -d /usr/local/bin ]; then mkdir /usr/local/bin ; fi
-	cp bin/xm-console /usr/local/bin
 	cp bin/xm-reimage /usr/local/bin
 	cp bin/xen-login-shell /usr/local/bin
 	cp bin/xen-shell /usr/local/bin
@@ -35,7 +34,6 @@ remove:
 	rm /usr/local/bin/xen-shell
 	rm /usr/local/bin/xen-login-shell
 	rm /usr/local/bin/xen-console
-	rm /usr/local/bin/xm-console
 	rm /usr/local/bin/xm-reimage
 	rm /usr/local/etc/_screenrc
 	-rmdir /usr/local/etc
