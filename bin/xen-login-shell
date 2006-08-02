@@ -1,27 +1,32 @@
 #!/bin/sh
 #
 #  Invoke screen with some sane options so that we can allow
-# the user to connect to a Xen console safely.
+# the user to run the xen-shell inside it, but disallow them from breaking
+# out of it.
 #
 # Steve
 # --
-# $Id: xen-login-shell,v 1.1 2006-07-28 22:38:17 steve Exp $
+# $Id: xen-login-shell,v 1.2 2006-08-02 23:22:57 steve Exp $
 
 
 #
 #  Options we use:
 #
-# -c file
-#   Override the default configuration file from "$HOME/.screenrc" to file
-#
 # -d -R
 #   Reattach a session and if necessary detach or even create it first.
 #
+# -c file
+#   Override the default configuration file from "$HOME/.screenrc" to file
+#
+# -e^Aa
+#   Set the escape sequence which GNU Screen should use.
+#
 # -s
-#   set the login shell
+#   set the login shell - this is the command which will run when the user
+#  created a new window, or when the screen session starts/restarts.
 #   
 # -S
-#   set the title of this screen
+#   set the title of the screen session.
 #
 
 screen -d -R -c /usr/local/etc/_screenrc -e^Aa -s /usr/local/bin/xen-shell  -S $USER
