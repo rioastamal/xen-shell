@@ -58,7 +58,7 @@ use Pod::Usage;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.27 $';
+my $VERSION   = '$Revision: 1.28 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -578,7 +578,7 @@ sub do_boot
 sub do_console
 {
     print "Running console for $USER\n";
-    system( "xm-console" );
+    system( "sudo xm console $USER" );
 }
 
 
@@ -604,7 +604,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.27 2006-08-02 23:23:10 steve Exp $
+ $Id: xen-shell,v 1.28 2006-08-02 23:24:08 steve Exp $
 
 =cut
 
