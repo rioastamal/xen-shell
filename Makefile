@@ -42,7 +42,7 @@ install:
 #
 #  Make a new release tarball.
 #
-release: test update-version update-modules clean changelog
+release: clean
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)
 	rm -f $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz
 	cp -R . $(DIST_PREFIX)/$(BASE)-$(VERSION)
