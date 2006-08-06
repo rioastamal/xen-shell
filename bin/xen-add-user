@@ -5,7 +5,7 @@
 #
 # Steve
 # --
-# $Id: xen-add-user,v 1.1 2006-08-01 00:04:06 steve Exp $
+# $Id: xen-add-user,v 1.2 2006-08-06 22:27:06 steve Exp $
 #
 
 
@@ -41,16 +41,32 @@ else
     mkdir "/home/${user}"
 fi
 
+#
+#  Fix directory such the the user can modify the .ssh directory.
+#
+chown -R ${user}:users "/home/${user}"
+
 
 #
 #  Create an SSH login key, so they can access the xen-shell
 #
 echo "Creating SSH key"
- su -c "ssh-keygen -t dsa" ${user}
+echo -e "\n\n\n" | su -c "ssh-keygen -t dsa" ${user}
 
 
 #
-#  Change the shell
+#  Change the key file to be an authorized key file, and move the
+# public key file somewhere obvious.
+#
+if [ ! -e /home/${user}/.ssh/authorized_keys ]; then
+    echo "Changing key to be authorised keyfile"
+    mv /home/${user}/.ssh/id_dsa.pub  /home/${user}/.ssh/authorized_keys
+    mv /home/${user}/.ssh/id_dsa /home/${user}/key.${user}
+fi
+
+
+#
+#  Change the login shell for the new user.
 #
 echo "Changing login shell for ${user}"
 chsh -s /usr/local/bin/xen-login-shell "${user}"
@@ -78,11 +94,10 @@ chown -R ${user}:users "/home/${user}"
 #
 cat <<EOF
 
-   Dont forget to update /etc/sudoers :
+   Don't forget to update /etc/sudoers so that the user can execute the 
+  following two commands as root without a password:
 
-User_Alias   XENUSERS = user1, user2, user3, ...
-Cmnd_Alias   XEN      = /usr/sbin/xm
-Cmnd_Alias   XENIMG   = /usr/bin/xen-create-image
-XENUSERS     ALL      = NOPASSWD: XEN,XENIMG
+     /usr/sbin/xm
+     /usr/bin/xen-create-image
 
 EOF
