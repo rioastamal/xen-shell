@@ -58,7 +58,7 @@ use Pod::Usage;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.33 $';
+my $VERSION   = '$Revision: 1.34 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -568,24 +568,24 @@ sub show_version
     open( INFO, $cmd . "|" );
     foreach my $line ( <INFO> )
     {
-        if ( $line =~ /^xen_major([0-9]+)/ )
+        if ( $line =~ /^xen_major.*: (.*)$/ )
         {
-            $xen .= "$1";
+            $xen .= $1;
         }
-        if ( $line =~ /^xen_minor([0-9]+)/ )
+        if ( $line =~ /^xen_minor.*: (.*)$/ )
         {
-            $xen .= ".$1";
+            $xen .= "." . $1;
         }
-        if ( $line =~ /^xen_extra([0-9]+)/ )
+        if ( $line =~ /^xen_extra.*: (.*)$/ )
         {
-            $xen .= "$1";
+            $xen .= $1;
         }
     }
     close( INFO );
     print "xen-shell $VERSION";
     if ( length( $xen ) )
     {
-        print "running on Xen version $xen";
+        print " running on Xen version $xen";
     }
 
     print "\n";
@@ -711,7 +711,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.33 2006-08-06 22:04:05 steve Exp $
+ $Id: xen-shell,v 1.34 2006-08-06 22:09:28 steve Exp $
 
 =cut
 
