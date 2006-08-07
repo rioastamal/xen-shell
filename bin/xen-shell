@@ -58,7 +58,7 @@ use Pod::Usage;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.37 $';
+my $VERSION   = '$Revision: 1.38 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -95,7 +95,8 @@ my %dispatch =
    "help" =>
      {
         sub => \&show_help,
-       help => "Show help about the specified command, or all commands.",
+       args => "[command]",
+       help => "Show help about the specified command, or all commands if no command is specified.",
      },
   "quit" =>   # Dupe: exit
      {
@@ -105,7 +106,8 @@ my %dispatch =
    "rdns" =>
      {
        sub  => \&do_rdns,
-       help => "Setup Reverse DNS for allocated IP addresses",
+       args => "[ipaddress some.host.name]",
+       help => "Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
      },
    "reboot" =>
      {
@@ -552,12 +554,16 @@ sub show_help
     {
         foreach my $cmd ( split( /[ \t]/, $term ) )
         {
-            print "\nCommand: $cmd\n\n";
 
             # Lookup command in our dispatch table.
             my $c = $dispatch{ lc( $cmd ) };
             if ( $c )
             {
+                my $args = $c->{'args'};
+
+                if ( !defined( $args ) ) { $args = ''; }
+
+                print "\nCommand: $cmd $args\n\n";
                 print $c->{'help'} . "\n";
             }
             else
@@ -715,7 +721,7 @@ sub do_rdns
     }
     else
     {
-        print "IP details for '$ip' not found.  Ignoring\n";
+        print "IP details for IP '$ip' not found.  Ignoring\n";
     }
 }
 
@@ -838,7 +844,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.37 2006-08-07 13:36:16 steve Exp $
+ $Id: xen-shell,v 1.38 2006-08-07 20:35:31 steve Exp $
 
 =cut
 
