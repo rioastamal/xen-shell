@@ -58,7 +58,7 @@ use Pod::Usage;
 #
 #  Version number
 #
-my $VERSION   = '$Revision: 1.36 $';
+my $VERSION   = '$Revision: 1.37 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -646,7 +646,77 @@ sub show_version
 
 sub do_rdns
 {
-    print "Not implemented\n";
+    my ( $args ) = ( @_ );
+
+    if ( !defined( $args ) || ( !length( $args ) ) )
+    {
+        # No arguments just show the current IP setup.
+        open( CURRENT, "<", "/home/$USER/ips.txt" ) or return;
+        while(<CURRENT>)
+        {
+            print;
+        }
+        close( CURRENT );
+        return;
+    }
+
+
+    #
+    #  We have an agument.  Assume it is of the form:
+    #
+    #  rdns xx.xx.xx.xx some.host.name
+    #
+    my ( $ip, $host ) = split( /[ \t]/, $args );
+
+    #
+    #  Test that the arguments are the right way round!
+    #
+    if ( $ip !~ /^([0-9.]*)$/ )
+    {
+        print "The IP address you've specified isn't numerical: '$ip'\n";
+        return;
+    }
+
+    #
+    #  OK we have a host and IP, we want to open the users file
+    # and update the hostname if it matches.
+    #
+    my $updated = 0;
+    my @lines;
+
+    open( CURRENT, "<", "/home/$USER/ips.txt" ) or return;
+    while(<CURRENT>)
+    {
+        my $line      = $_;
+        my ( $i, $h ) = split( /[ \t]/, $line );
+        if ( $i eq $ip )
+        {
+            $line    = $ip . " " . $host . "\n";
+            $updated = 1;
+        }
+
+        push @lines, $line;
+    }
+    close( CURRENT );
+
+    #
+    #  If we updated save the new details.
+    #
+    if ( $updated )
+    {
+        open( NEW, ">", "/home/$USER/ips.txt" );
+        foreach my $l ( @lines )
+        {
+            print NEW $l;
+        }
+        close( NEW );
+        print "Set the reverse DNS for $ip to $host\n";
+        print "Please wait an hour or two for it to take effect\n";
+    }
+    else
+    {
+        print "IP details for '$ip' not found.  Ignoring\n";
+    }
 }
 
 
@@ -768,7 +838,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.36 2006-08-07 11:57:04 steve Exp $
+ $Id: xen-shell,v 1.37 2006-08-07 13:36:16 steve Exp $
 
 =cut
 
