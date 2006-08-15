@@ -1,5 +1,4 @@
 
-
 xen-shell
 ---------
 
@@ -25,6 +24,22 @@ xen-shell
  and command completion.
 
 
+
+Support
+-------
+
+  This software is released either under the terms of the GNU General Public
+ License or the Perl artistic license, at your choice.
+
+  This allows you to use it commercially with no charge - however commercial
+ users are encouraged to make a donation if they're generating a profit:
+
+    http://steve.org.uk/donate/
+
+  Bug reports/suggestions can be sent to the author.
+
+
+
 Notes
 -----
 
@@ -35,19 +50,42 @@ Notes
   GNU Screen has several abilities to "break out", I've disabled all
  the ones I can spot.  There may be holes.
 
-  The reimaging support isn't fully integrated, so for every user
- you wish to allow reimaging you will need to create:
+
+
+Reverse DNS
+-----------
+
+  Whilst the shell doesn't perform any forward/reverse DNS changes by
+ itself it does have integrated support for carrying out such actions.
+
+  The shell reads ~/ips.txt if it exists and enables the reverse DNS
+ support.  When the user makes any changes it is only this file which
+ is updated - you are assumed to write a cronjob to notice these changes
+ and do the real changes.
+
+  For more details see "xen-shell --manual".
+
+
+
+Reimaging
+---------
+
+  The shell supports the ability to allow users to reimage their system
+ to reset it to a pristine state.  This ability isn't in the shell per se,
+ instead the script will invoke:
 
         /home/$USER/image.sh
 
-  This script will be invoked to do the job after waiting for confirmation.
-  The script probably just needs to execute xen-create-image appropriately...
+  The shell will prompt for confirmation before executing the script, and
+ countdown to allow the user to change their mind.
+
+  For more details see "xen-shell --manual".
 
 
 Installation
 ------------
 
-  sudo make install
+  "make install" when executed as root will install to the system
 
   Once installed set each user who you wish to control a Xen instance
  to have their shell as /usr/local/bin/xen-login-shell.
@@ -60,31 +98,13 @@ Installation
 ---
 User_Alias   XENUSERS = steve,nsa,grimoire,joey
 Cmnd_Alias   XEN      = /usr/sbin/xm
-Cmnd_Alias   XENIMG   = /usr/bin/xen-create-image
 XENUSERS     ALL      = NOPASSWD: XEN,XENIMG
 ---
 
-
-
-Notes
------
-
-  The reimaging and reverse DNS handling is mostly done externally.
- For the reimaging the shell just executes "~/image.sh" for the 
- appropriate user.
-
-  For DNS management the script merely modifies the "~/ips.txt" file
- of the given user.
-
-  These are Steve-specific.  Probably.
-
-
-
-Bugs?
------
-
-  Surely some mistake, Mr Bond?
+  If you use the "reimage" system then you'll want to allow the users to
+ execte "xen-create-image" if you use that too.
 
 
 Steve
 -- 
+[steve@steve.org.uk]
