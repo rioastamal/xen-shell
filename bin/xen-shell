@@ -20,12 +20,13 @@ xen-shell - Provide a command line interface to control Xen guests.
 
 =head1 DESCRIPTION
 
-  xen-shell aims to provide a simple command line interface
- which will allow a user to control a single Xen instance which
-has the same name as their Unix username.
+  xen-shell aims to provide a simple console interface to allow a user to
+control a single Xen instance which is running upon the localhost.
 
-  The shell provides several commands to control the instance
- and supports such featurs as:
+  The xen instance is assumed to have the same name as the users login
+ name, and will not work if that isn't the case.
+
+  Features include:
 
 =over 8
 
@@ -33,19 +34,37 @@ has the same name as their Unix username.
 
 =item Command history
 
-=item Readline support
-
 =item The ability to run within GNU Screen to allow longrunning jobs to be completed "offline".
 
 =back
 
 =cut
 
-=head1 IMPLEMENTATION NOTES
 
-  There now follows a brief overview of the code.
+=head1 AUTHOR
+
+ Steve
+ --
+ http://www.steve.org.uk/
+
+ $Id: xen-shell,v 1.39 2006-08-15 19:06:35 steve Exp $
 
 =cut
+
+
+=head1 LICENSE
+
+Copyright (c) 2005-2006 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
+
+
 
 
 use strict;
@@ -56,9 +75,9 @@ use Pod::Usage;
 
 
 #
-#  Version number
+#  Version number of this script.
 #
-my $VERSION   = '$Revision: 1.38 $';
+my $VERSION   = '$Revision: 1.39 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -69,11 +88,11 @@ my $USER = getpwuid( $REAL_USER_ID );
 
 
 #
-#  Dispatch table which contains the mappings between the commands
-# we make available and the routine which implements that behaviour
-# along with the relevant help text.
+#  Dispatch table which contains the mapping between the commands
+# we make available and the routine which implements that behaviour.
 #
-#  This is a hash of hashes.  Obviously.
+#  The help-text is also specified here.
+#
 #
 my %dispatch =
   (
@@ -197,7 +216,7 @@ exit;
 
 
 
-=head2 parseCommandLineArguments
+=begin doc
 
   Parse any command line options which might be present
 
@@ -229,7 +248,7 @@ sub parseCommandLineArguments
 }
 
 
-=head2 sanityCheck
+=begin doc
 
  Sanity check that we can load the modules we require, and also make sure
 the current user has a xen guest on this host machine.
@@ -277,7 +296,7 @@ sub sanityCheck
 
 
 
-=head2 removeCommands
+=begin doc
 
   Remove any commands which the current user cannot use.
 
@@ -306,7 +325,7 @@ sub removeCommands
 
 
 
-=head2 showBanner
+=begin doc
 
  Show the banner of this shell - used when we start up.
 
@@ -319,7 +338,7 @@ sub showBanner
 
 
 
-=head2 createTerm
+=begin doc
 
   Create the terminal interface, complete with command completion.
 
@@ -354,7 +373,7 @@ sub createTerm
 
 
 
-=head2 loadHistory
+=begin doc
 
   If the user has a xen-shell history load it up.
 
@@ -377,7 +396,7 @@ sub loadHistory
 
 
 
-=head2 runMainLoop
+=begin doc
 
   Run the input reading + dispatching loop.   We use the dispatch
  table already defined to handle input.
@@ -433,7 +452,7 @@ sub runMainLoop
 
 
 
-=head2 show_uptime
+=begin doc
 
   Show uptime of the guest.
 
@@ -478,7 +497,7 @@ sub show_uptime
 }
 
 
-=head2 show_status
+=begin doc
 
   Show status of the guest system:  Running/Shutdown
 
@@ -537,7 +556,7 @@ sub show_status
 
 
 
-=head2 show_help
+=begin doc
 
   Show the user some help
 
@@ -600,7 +619,7 @@ E_O_HELP
 
 
 
-=head2 show_help
+=begin doc
 
   Show the user the version of this shell.
 
@@ -640,7 +659,7 @@ sub show_version
 
 
 
-=head2 do_rdns
+=begin doc
 
   Control reverse DNS for this user.  This doesn't actually do
  anything related to DNS itself, it merely updates a file "ips.txt"
@@ -726,7 +745,7 @@ sub do_rdns
 }
 
 
-=head2 do_reboot
+=begin doc
 
   Reboot the instance.
 
@@ -740,7 +759,7 @@ sub do_reboot
 
 
 
-=head2 do_reimage
+=begin doc
 
   Allow the machine to be reinitialised to a fresh installation of
  their Xen guest.  This ultimately invokes ~$USER/image.sh to do
@@ -782,7 +801,7 @@ sub do_reimage
 
 
 
-=head2 do_shutdown
+=begin doc
 
   Shutdown the instance.
 
@@ -795,7 +814,7 @@ sub do_shutdown
 }
 
 
-=head2 do_boot
+=begin doc
 
   Start the instance.
 
@@ -809,7 +828,7 @@ sub do_boot
 }
 
 
-=head2 do_console
+=begin doc
 
   Run GNU Screen with the console output of Xen.
 
@@ -822,7 +841,7 @@ sub do_console
 }
 
 
-=head2 do_exit
+=begin doc
 
  Exit this shell
 
@@ -844,7 +863,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.38 2006-08-07 20:35:31 steve Exp $
+ $Id: xen-shell,v 1.39 2006-08-15 19:06:35 steve Exp $
 
 =cut
 
