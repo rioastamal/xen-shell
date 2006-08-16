@@ -5,7 +5,7 @@
 #
 # Steve
 # --
-# $Id: xen-add-user,v 1.2 2006-08-06 22:27:06 steve Exp $
+# $Id: xen-add-user,v 1.3 2006-08-16 22:25:24 steve Exp $
 #
 
 
@@ -22,22 +22,24 @@ fi
 #
 #  Add the system user if it isn't already present
 #
-echo "Creating new Unix user ${user}"
 if ( grep ${user} /etc/passwd > /dev/null ) ; then
     echo "Warning user ${user} already exists in the passwd file."
-    echo "Press return to proceed, or Ctrl-c to cancel"
+    echo "Press return to proceed, or Ctrl-c to cancel."
     read
 else
+    echo "Creating new system user ${user}"
     /usr/sbin/useradd "${user}"
 fi
 
 #
 #  Make a home directory
 #
-echo "Making home directory for ${user}"
 if [ -d "/home/${user}" ]; then
     echo "Home directory already present.  Weird"
+    echo "Press return to proceed, or Ctrl-c to cancel."
+    read
 else
+    echo "Making home directory for ${user}"
     mkdir "/home/${user}"
 fi
 
@@ -68,8 +70,8 @@ fi
 #
 #  Change the login shell for the new user.
 #
-echo "Changing login shell for ${user}"
-chsh -s /usr/local/bin/xen-login-shell "${user}"
+echo "Changing login shell for ${user} to /usr/bin/xen-login-shell"
+chsh -s /usr/bin/xen-login-shell "${user}"
 
 
 #
@@ -92,12 +94,13 @@ chown -R ${user}:users "/home/${user}"
 #
 #  Warning
 #
-cat <<EOF
+if ( grep /usr/sbin/xm /etc/sudoers 2>/dev/null >/dev/null ) ; then
+    
+    #
+    # OK
+    #
+    :
+else
 
-   Don't forget to update /etc/sudoers so that the user can execute the 
-  following two commands as root without a password:
-
-     /usr/sbin/xm
-     /usr/bin/xen-create-image
-
-EOF
+    echo "Do not forget to update /etc/sudoers appropriately."
+fi
