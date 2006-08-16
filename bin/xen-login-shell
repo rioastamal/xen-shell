@@ -6,7 +6,7 @@
 #
 # Steve
 # --
-# $Id: xen-login-shell,v 1.2 2006-08-02 23:22:57 steve Exp $
+# $Id: xen-login-shell,v 1.3 2006-08-16 15:26:59 steve Exp $
 
 
 #
@@ -29,5 +29,68 @@
 #   set the title of the screen session.
 #
 
-screen -d -R -c /usr/local/etc/_screenrc -e^Aa -s /usr/local/bin/xen-shell  -S $USER
+
+#
+#  Firstly find the custome screen configuration file we're 
+# wanting to use.
+#
+screenrc=
+for i in /etc/xen-shell/_screenrc /usr/local/etc/_screenrc ; do
+
+    # If we've not found the file already
+    if [ -z "${screenrc}" ]; then
+
+        # And the given file exists
+        if [ -e $i ]; then
+
+            # Record it
+            screenrc=$i
+        fi
+    fi
+done
+
+
+#
+#  Make sure we found a configuration file for GNU Screen
+#
+if [ -z "${screenrc}" ]; then
+    echo "Could not find our custom GNU Screen configuration file"
+    echo "Aborting"
+    exit
+fi
+
+
+#
+#  Now find the xen-shell
+#
+xs=
+for i in /usr/bin/xen-shell /usr/local/bin/xen-shell ; do
+
+    # If we've not found the shell already
+    if [ -z "${xs}" ]; then
+
+        # And the given potential shell exists
+        if [ -x $i ]; then
+
+            # Record it
+            xs=$i
+        fi
+    fi
+done
+
+#
+#  If we haven't found our shell then abort
+#
+if [ -z "${xs}" ]; then
+    echo "Could not find the xen-shell in the directories we searched."
+    echo "Aborting"
+    exit
+fi
+
+
+#
+#  Now that we know which shell and configuration file to execute
+# start our xen-shell inside the new instance of GNU Screen.
+#
+screen -d -R -c ${screenrc} -e^Aa -s ${xs}  -S $USER
 
