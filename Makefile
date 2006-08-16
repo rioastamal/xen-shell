@@ -31,16 +31,18 @@ diff:
 
 
 #
-#  Install into /usr/local
+#  Install into /usr/bin, then remove the old install from /usr/local/bin
 #
 install:
-	if [ ! -d /usr/local/bin ]; then mkdir /usr/local/bin ; fi
-	cp bin/xm-reimage /usr/local/bin
-	cp bin/xen-login-shell /usr/local/bin
-	cp bin/xen-shell /usr/local/bin
-	if [ ! -d /usr/local/etc ]; then mkdir /usr/local/etc ; fi
-	cp misc/_screenrc /usr/local/etc
-
+	cp bin/xm-reimage /usr/bin
+	cp bin/xen-login-shell /usr/bin
+	cp bin/xen-shell /usr/bin
+	if [ ! -d /etc/xen-shell ]; then mkdir /etc/xen-shell ; fi
+	cp misc/_screenrc /etc/xen-shell
+	@if [ -e /usr/local/bin/xm-reimage ]; then chmod -x /usr/local/bin/xm-reimage; echo "Obsolete software in /usr/local/bin/xm-reimage - please remove"; fi
+	@if [ -e /usr/local/bin/xen-shell ]; then chmod -x /usr/local/bin/xen-shell ; echo "Obsolete software in /usr/local/bin/xm-reimage - please remove"; fi
+	@if [ -e /usr/local/bin/xen-login-shell ]; then chmod -x /usr/local/bin/xen-login-shell; echo "Obsolete software in /usr/local/bin/xm-reimage - please remove"; fi
+	@if ( grep /usr/local/bin/xen-login-shell /etc/passwd >/dev/null 2>/dev/null ) ; then echo "WARNING:  /etc/passwd contains users with their login shell pointing to the OLD software which was in /usr/local/bin" ; fi
 
 #
 #  Make a new release tarball.
@@ -62,12 +64,11 @@ release: clean
 #  Reove the software
 #
 remove:
-	rm /usr/local/bin/xen-shell
-	rm /usr/local/bin/xen-login-shell
-	rm /usr/local/bin/xen-console
-	rm /usr/local/bin/xm-reimage
-	rm /usr/local/etc/_screenrc
-	-rmdir /usr/local/etc
+	rm /usr/bin/xen-shell
+	rm /usr/bin/xen-login-shell
+	rm /usr/bin/xm-reimage
+	rm /etc/xen-shell/_screenrc
+	-rmdir /etc/xen-shell
 
 #
 #  Update from CVS repository
