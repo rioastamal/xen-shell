@@ -1,0 +1,19 @@
+Source: xen-shell
+Section: utils
+Priority: extra
+Maintainer: Steve Kemp <steve@steve.org.uk>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.7.2
+
+Package: xen-shell
+Architecture: all
+Depends: perl-modules, libterm-readline-gnu-perl, screen
+Recommends: xen-tools, sudo
+Description: Console based Xen administration utility
+ Using the xen-shell a hosting company could easily allow their customers
+ to fully manage inidividual Xen guest instances.
+ .
+ The shell allows users to start, stop, reboot, or connect to the serial
+ console of their Xen guest isntance.
+ .
+ Homepage: http://xen-tools.org/software/xen-shell

@@ -20,7 +20,10 @@ all:
 
 
 clean:
-	find . -name '*~' -exec rm -f \{\} \;
+	@find . -name '*~' -exec rm -f \{\} \;
+	@if [ -e build-stamp ]; then rm -f build-stamp ; fi
+	@if [ -e configure-stamp ]; then rm -f configure-stamp ; fi
+	@if [ -d debian/xen-shell ]; then rm -rf debian/xen-shell ; fi
 
 
 diff:

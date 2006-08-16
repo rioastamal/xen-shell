@@ -1,0 +1,64 @@
+#!/usr/bin/make -f
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	touch configure-stamp
+
+
+build: build-stamp
+
+build-stamp: configure-stamp 
+	dh_testdir
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	make clean
+	rm -f build-stamp configure-stamp
+	dh_clean 
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+
+	mkdir -p `pwd`/debian/xen-shell/etc/xen-shell
+	mkdir -p `pwd`/debian/xen-shell/usr/bin
+	mkdir -p `pwd`/debian/xen-shell/usr/share/man/man1
+
+	cp misc/_screenrc      `pwd`/debian/xen-shell/etc/xen-shell
+	cp bin/xen-login-shell `pwd`/debian/xen-shell/usr/bin
+	cp bin/xen-shell       `pwd`/debian/xen-shell/usr/bin
+	cp bin/xm-reimage      `pwd`/debian/xen-shell/usr/bin
+
+	pod2man bin/xen-shell `pwd`/debian/xen-shell/usr/share/man/man1/xen-shell.1
+	gzip -f -9 `pwd`/debian/xen-shell/usr/share/man/man1/xen-shell.1
+
+	dh_installdirs
+	dh_installexamples bin/xen-add-user
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install
+	dh_installchangelogs
+	dh_installdocs
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

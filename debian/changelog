@@ -1,0 +1,6 @@
+xen-shell (0.4-0) unstable; urgency=low
+
+  * Initial release (Closes: #344081)
+
+ -- Steve Kemp <steve@steve.org.uk>  Wed, 16 Aug 2006 17:50:46 +0000
+
