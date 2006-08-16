@@ -57,7 +57,11 @@ Notes
  break out into general host access.
 
   GNU Screen has several abilities to "break out", I've disabled all
- the ones I can spot.  There may be holes.
+ the ones I can spot via the _screenrc file which is installed into
+ /etc/xen-shell.
+
+  There may be holes I'm currently unaware of, and if you spot one I'd
+ appreciate learning of it.
 
 
 
@@ -67,10 +71,13 @@ Reverse DNS
   Whilst the shell doesn't perform any forward/reverse DNS changes by
  itself it does have integrated support for carrying out such actions.
 
-  The shell reads ~/ips.txt if it exists and enables the reverse DNS
- support.  When the user makes any changes it is only this file which
- is updated - you are assumed to write a cronjob to notice these changes
- and do the real changes.
+  The shell reads ~/ips.txt for the user if it exists and enables the
+ reverse DNS support.  If that file isn't present the rdns command is
+ disabled.
+
+  When the user makes any changes using the rdns command it is only the
+ ips.txt file which is updated - you are expected to write a cronjob to
+ notice these changes and perform the real DNS updates.
 
   For more details see "xen-shell --manual".
 
@@ -79,8 +86,8 @@ Reverse DNS
 Reimaging
 ---------
 
-  The shell supports the ability to allow users to reimage their system
- to reset it to a pristine state.  This ability isn't in the shell per se,
+  The shell supports the ability to allow users to reimage their system,
+ or reset it to a pristine state.  This ability isn't in the shell per se,
  instead the script will invoke:
 
         /home/$USER/image.sh
@@ -88,16 +95,21 @@ Reimaging
   The shell will prompt for confirmation before executing the script, and
  countdown to allow the user to change their mind.
 
+  To add support you are expected to write a short shell script to 
+ untar/install/fix their installation.  Using the xen-tools package you
+ can allow your users to install Sarge, CentOS, or Gentoo.
+
   For more details see "xen-shell --manual".
 
 
 Installation
 ------------
 
-  "make install" when executed as root will install to the system
+  "make install" when executed as root will install this software upon
+ your system.
 
   Once installed set each user who you wish to control a Xen instance
- to have their shell as /usr/bin/xen-login-shell.
+ to have their login shell be: /usr/bin/xen-login-shell.
 
   You'll need to ensure that these users can run "xm" as root with
  no password, via sudo:
@@ -111,7 +123,7 @@ XENUSERS     ALL      = NOPASSWD: XEN,XENIMG
 ---
 
   If you use the "reimage" system then you'll want to allow the users to
- execte "xen-create-image" if you use that too.
+ execute "xen-create-image" if you use that too.
 
 
 Steve
