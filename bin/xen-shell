@@ -111,7 +111,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.46 2006-08-17 21:41:34 steve Exp $
+ $Id: xen-shell,v 1.47 2006-08-17 21:41:46 steve Exp $
 
 =cut
 
@@ -141,7 +141,7 @@ use Pod::Usage;
 #
 #  Version number of this script, taken from the CVS revision number.
 #
-my $VERSION   = '$Revision: 1.46 $';
+my $VERSION   = '$Revision: 1.47 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -408,7 +408,7 @@ sub removeCommands
 
 =begin doc
 
- Show the startu banner for the shell.
+ Show the startup banner for the shell.
 
 =end doc
 
@@ -1018,7 +1018,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.46 2006-08-17 21:41:34 steve Exp $
+ $Id: xen-shell,v 1.47 2006-08-17 21:41:46 steve Exp $
 
 =cut
 
