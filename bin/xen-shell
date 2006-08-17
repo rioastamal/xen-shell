@@ -111,7 +111,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.45 2006-08-16 22:30:12 steve Exp $
+ $Id: xen-shell,v 1.46 2006-08-17 21:41:34 steve Exp $
 
 =cut
 
@@ -141,7 +141,7 @@ use Pod::Usage;
 #
 #  Version number of this script, taken from the CVS revision number.
 #
-my $VERSION   = '$Revision: 1.45 $';
+my $VERSION   = '$Revision: 1.46 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -287,6 +287,8 @@ exit;
 
   Parse any command line options which might be present
 
+=end doc
+
 =cut
 
 sub parseCommandLineArguments
@@ -320,6 +322,8 @@ sub parseCommandLineArguments
  Sanity check that we can load the Perl modules we require.
 
  Also make sure the current user has a Xen guest on this host machine.
+
+=end doc
 
 =cut
 
@@ -373,6 +377,8 @@ sub sanityCheck
     - We remove "rdns" if ~/ips.txt isn't present or writable.
     - We remove "reimage" if ~/image.sh isn't present and executable.
 
+=end doc
+
 =cut
 
 sub removeCommands
@@ -404,6 +410,8 @@ sub removeCommands
 
  Show the startu banner for the shell.
 
+=end doc
+
 =cut
 
 sub showBanner
@@ -419,6 +427,8 @@ sub showBanner
 
   Rather than hard-wiring the commands which are available we take them
  from our global dispatch table.
+
+=end doc
 
 =cut
 
@@ -455,6 +465,8 @@ sub createTerm
 
   If the user has a history present in ~/.xen-shell load it up.
 
+=end doc
+
 =cut
 
 sub loadHistory
@@ -484,6 +496,8 @@ sub loadHistory
  token on the line and "args" which is the remainder of the line.
 
   This is sufficient for our purposes.
+
+=end doc
 
 =cut
 
@@ -534,6 +548,8 @@ sub runMainLoop
 
   Show uptime of the guest.
 
+=end doc
+
 =cut
 
 sub show_uptime
@@ -580,6 +596,8 @@ sub show_uptime
   Show status of the Xen guest:  Running/Shutdown
 
   If the guest is running then show its uptime too.
+
+=end doc
 
 =cut
 
@@ -644,6 +662,8 @@ sub show_status
 
   If called with arguments then they we will show only help for the
  specified command(s).
+
+=end doc
 
 =cut
 
@@ -723,6 +743,8 @@ E_O_HELP
 
   Show the user the version of this shell, and of the Xen software installed.
 
+=end doc
+
 =cut
 
 sub show_version
@@ -767,6 +789,8 @@ sub show_version
 
   Another script is required to actually take the contents of the files
  and perform the DNS updates.
+
+=end doc
 
 =cut
 
@@ -850,6 +874,8 @@ sub do_rdns
 
   Reboot the Xen guest.
 
+=end doc
+
 =cut
 
 sub do_reboot
@@ -866,6 +892,8 @@ sub do_reboot
  their Xen guest.
 
   This ultimately invokes ~$USER/image.sh to do the work.
+
+=end doc
 
 =cut
 
@@ -924,6 +952,8 @@ sub do_reimage
 
   Shutdown the instance.
 
+=end doc
+
 =cut
 
 sub do_shutdown
@@ -936,6 +966,8 @@ sub do_shutdown
 =begin doc
 
   Start the instance.
+
+=end doc
 
 =cut
 
@@ -951,6 +983,8 @@ sub do_boot
 
   Connect to the serial console of the running Xen guest.
 
+=end doc
+
 =cut
 
 sub do_console
@@ -963,6 +997,8 @@ sub do_console
 =begin doc
 
  Exit this shell, first saving any command history.
+
+=end doc
 
 =cut
 
@@ -982,7 +1018,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.45 2006-08-16 22:30:12 steve Exp $
+ $Id: xen-shell,v 1.46 2006-08-17 21:41:34 steve Exp $
 
 =cut
 
