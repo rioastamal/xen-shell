@@ -36,8 +36,13 @@ install: build
 	cp bin/xen-shell       `pwd`/debian/xen-shell/usr/bin
 	cp bin/xm-reimage      `pwd`/debian/xen-shell/usr/bin
 
-	pod2man bin/xen-shell `pwd`/debian/xen-shell/usr/share/man/man1/xen-shell.1
-	gzip -f -9 `pwd`/debian/xen-shell/usr/share/man/man1/xen-shell.1
+# make the manpages
+	mkdir -p `pwd`/debian/xen-shell/usr/share/man/man1/
+	for i in bin/*-*; do file=`basename $$i`; pod2man $$i `pwd`/debian/xen-shell/usr/share/man/man1/$$file.1; done
+	for i in `pwd`/debian/xen-shell/usr/share/man/man1/*.1; do gzip -f -9 $$i; done
+
+# the xen-add-user isn't supposed to be installed so we delete that one.
+	rm `pwd`/debian/xen-shell/usr/share/man/man1/xen-add-user.1.gz
 
 	dh_installdirs
 	dh_installexamples bin/xen-add-user
