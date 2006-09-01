@@ -13,6 +13,14 @@ if [ -z "${host}" ]; then
     exit
 fi
 
+#
+#  Make sure that the image.sh script exists.  We shouldn't have been
+# called if that wasn't the case .. but ..
+#
+if [ ! -x /home/${host}/image.sh ]; then
+    echo "The user ${host} does not have an executable reimaging script"
+    exit
+fi
 
 clear
 cat <<EOF
@@ -36,7 +44,7 @@ EOF
 read input
 if [  "${input}" != "I wish to reimage ${host}" ]; then
     clear
-    echo "Your changed your mind"
+    echo "You changed your mind"
     echo "Sensible choice"
     echo " "
     exit;
@@ -67,3 +75,70 @@ echo -e "\nCommitted."
 #  Run the reimage script.
 #
 /home/${host}/image.sh
+
+
+#
+#  End of this script
+#
+exit
+
+
+#
+#  Everything from here down is POD documentation, as used in Perl.
+# the reason this is here is so that we can generate a manpage easily.
+#
+#
+
+
+
+=head1 NAME
+
+xm-reimage - Prompt for confirmation and run a per-user reimage script
+
+=cut
+
+
+=head1 SYNOPSIS
+
+  xm-reimage USERNAME
+
+  This script accepts no other command line arguments, or flags.
+
+=cut
+
+
+=head1 DESCRIPTION
+
+  xm-reimage is invoked by the xen-shell when a user selects the
+ "reimage" command.
+
+  This script will prompt for confirmation, display a count-down to
+ allow one last chance, then invoke ~USERNAME/image.sh
+
+  If the "image.sh" script does not exist, or is not executable then
+ this script should never be invoked.
+
+=cut
+
+=head1 AUTHOR
+
+ Steve
+ --
+ http://www.steve.org.uk/
+
+ $Id: xm-reimage,v 1.4 2006-09-01 11:10:21 steve Exp $
+
+=cut
+
+
+=head1 LICENSE
+
+Copyright (c) 2005-2006 by Steve Kemp.  All rights reserved.
+
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The LICENSE file contains the full text of the license.
+
+=cut
+
