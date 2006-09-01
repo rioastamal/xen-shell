@@ -33,7 +33,7 @@ diff:
 #
 #  Install into /usr/bin, then remove the old install from /usr/local/bin
 #
-install:
+install: manpages
 	cp bin/xm-reimage /usr/bin
 	cp bin/xen-login-shell /usr/bin
 	cp bin/xen-shell /usr/bin
@@ -43,6 +43,12 @@ install:
 	@if [ -e /usr/local/bin/xen-shell ]; then chmod -x /usr/local/bin/xen-shell ; echo "Obsolete software in /usr/local/bin/xm-reimage - please remove"; fi
 	@if [ -e /usr/local/bin/xen-login-shell ]; then chmod -x /usr/local/bin/xen-login-shell; echo "Obsolete software in /usr/local/bin/xm-reimage - please remove"; fi
 	@if ( grep /usr/local/bin/xen-login-shell /etc/passwd >/dev/null 2>/dev/null ) ; then echo "WARNING:  /etc/passwd contains users with their login shell pointing to the OLD software which was in /usr/local/bin" ; fi
+
+
+manpages:
+	for i in bin/*-*; do file=`basename $$i`; pod2man $$i /usr/share/man/man1/$$file.1; done
+	for i in /usr/share/man/man1/*.1; do gzip -f -9 $$i; done
+	rm /usr/share/man/man1/xen-add-user.1.gz
 
 #
 #  Make a new release tarball.
