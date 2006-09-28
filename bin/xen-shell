@@ -111,7 +111,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.47 2006-08-17 21:41:46 steve Exp $
+ $Id: xen-shell,v 1.48 2006-09-28 16:54:37 steve Exp $
 
 =cut
 
@@ -141,7 +141,7 @@ use Pod::Usage;
 #
 #  Version number of this script, taken from the CVS revision number.
 #
-my $VERSION   = '$Revision: 1.47 $';
+my $VERSION   = '$Revision: 1.48 $';
 if ( $VERSION =~ /(1.[0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -176,6 +176,11 @@ my %dispatch =
         sub => \&show_help,
        args => "[command]",
        help => "Show help about the specified command, or all commands if no command is specified.",
+     },
+  "passwd" =>
+     {
+        sub => \&do_password,
+       help => "Change your login password.",
      },
   "quit" =>   # Dupe: exit
      {
@@ -376,6 +381,7 @@ sub sanityCheck
 
     - We remove "rdns" if ~/ips.txt isn't present or writable.
     - We remove "reimage" if ~/image.sh isn't present and executable.
+    - We remove "passwd" if ~/.ssh/authorized_keys is present and non-empty.
 
 =end doc
 
@@ -401,6 +407,15 @@ sub removeCommands
     {
         $dispatch{ 'rdns' } = undef;
         delete( $dispatch{ 'rdns' } );
+    }
+
+    #
+    #  Password changing isn't available if key-based auth is used.
+    #
+    if ( -s "/home/$USER/.ssh/authorized_keys" )
+    {
+        $dispatch{ 'passwd' } = undef;
+        delete( $dispatch{ 'passwd' } );
     }
 }
 
@@ -994,6 +1009,25 @@ sub do_console
 }
 
 
+
+=begin doc
+
+  Allow the user to change their login password, if password-based
+ authentication is in use.
+
+  Note this function is disabled if ~/.ssh/authorized_keys is present.
+
+=end doc
+
+=cut
+
+sub do_password
+{
+    system( "passwd" );
+}
+
+
+
 =begin doc
 
  Exit this shell, first saving any command history.
@@ -1018,7 +1052,7 @@ sub do_exit
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.47 2006-08-17 21:41:46 steve Exp $
+ $Id: xen-shell,v 1.48 2006-09-28 16:54:37 steve Exp $
 
 =cut
 
