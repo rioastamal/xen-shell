@@ -76,6 +76,21 @@ remove:
 	rm /etc/xen-shell/_screenrc
 	-rmdir /etc/xen-shell
 
+
+#
+#  Run the test suite.
+#
+test:
+	prove --shuffle tests/
+
+
+#
+#  Run the test suite verbosely.
+#
+test-verbose:
+	prove --shuffle --verbose tests/
+
+
 #
 #  Update from CVS repository
 #
