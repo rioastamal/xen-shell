@@ -18,10 +18,6 @@ BEGIN{ use_ok( 'File::Find' ); }
 require_ok( 'File::Find' );
 
 
-BEGIN{ use_ok( 'File::Temp' ); }
-require_ok( 'File::Temp' );
-
-
 BEGIN{ use_ok( 'Getopt::Long' ); }
 require_ok( 'Getopt::Long' );
 
