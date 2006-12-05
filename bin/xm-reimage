@@ -9,7 +9,7 @@
 #
 host=$1
 if [ -z "${host}" ]; then
-    echo "Usage:  $0 host"
+    echo "Usage: $0 host"
     exit
 fi
 
@@ -59,7 +59,7 @@ cat <<EOF
 
   Image recreation and wiping confirmed.
 
-  Sleeping for 10 seconds to give you one last chance to abort:
+  Sleeping for 10 seconds to give you one last chance to abort with 'Ctrl-c'
 
 EOF
 
@@ -83,11 +83,12 @@ echo -e "\nCommitted."
 exit
 
 
+###
 #
 #  Everything from here down is POD documentation, as used in Perl.
 # the reason this is here is so that we can generate a manpage easily.
 #
-#
+####
 
 
 
@@ -113,7 +114,7 @@ xm-reimage - Prompt for confirmation and run a per-user reimage script
  "reimage" command.
 
   This script will prompt for confirmation, display a count-down to
- allow one last chance, then invoke ~USERNAME/image.sh
+ allow one last chance, then invoke ~$USERNAME/image.sh
 
   If the "image.sh" script does not exist, or is not executable then
  this script should never be invoked.
@@ -126,7 +127,7 @@ xm-reimage - Prompt for confirmation and run a per-user reimage script
  --
  http://www.steve.org.uk/
 
- $Id: xm-reimage,v 1.4 2006-09-01 11:10:21 steve Exp $
+ $Id: xm-reimage,v 1.5 2006-12-05 10:12:19 steve Exp $
 
 =cut
 

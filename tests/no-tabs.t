@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 #
-#  Test that every perl + shell script we have contains no tabs.
+#  Test that none of our scripts contain any literal TAB characters.
 #
 # Steve
 # --
-# $Id: no-tabs.t,v 1.1 2006-11-21 11:29:54 steve Exp $
+# $Id: no-tabs.t,v 1.2 2006-12-05 10:12:19 steve Exp $
 
 
 use strict;
@@ -39,8 +39,8 @@ sub checkFile
     return if ( $file =~ /^\.\/debian\// );
 
     # See if it is a shell/perl file.
-    my $isShell        = 0;
-    my $isPerl        = 0;
+    my $isShell = 0;
+    my $isPerl  = 0;
 
     # Read the file.
     open( INPUT, "<", $file );
@@ -59,7 +59,7 @@ sub checkFile
     close( INPUT );
 
     #
-    #  Return if it wasn't a perl file.
+    #  We don't care about files which are neither perl nor shell.
     #
     if ( $isShell || $isPerl )
     {
@@ -73,20 +73,21 @@ sub checkFile
 }
 
 
-=head2 countTabCharacters
 
-=cut
-
+#
+#  Count and return the number of literal TAB characters contained
+# in the specified file.
+#
 sub countTabCharacters
 {
     my ( $file ) = (@_);
-
     my $count = 0;
 
     open( FILE, "<", $file )
       or die "Cannot open $file - $!";
     foreach my $line ( <FILE> )
     {
+        # We will count multiple tab characters in a single line.
         while( $line =~ /(.*)\t(.*)/ )
         {
             $count += 1;
