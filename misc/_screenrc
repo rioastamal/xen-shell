@@ -1,20 +1,14 @@
-# $Id: _screenrc,v 1.3 2006-07-28 22:52:14 steve Exp $
 #
-# /etc/screenrc
+#  _screenrc :  Disable dangerous options to GNU Screen.
 #
-#   This is the system wide screenrc.
+# This file is distributed as part of xen-shell:
 #
-#   You can use this file to change the default behavior of screen system wide
-#   or copy it to ~/.screenrc and use it as a starting point for your own
-#   settings.
+#   http://xen-tools.org/software/xen-shell/
 #
-#   Commands in this file are used to set options, bind screen functions to
-#   keys, redefine terminal capabilities, and to automatically establish one or
-#   more windows at the beginning of your screen session.
+# Steve
+# --
 #
-#   This is not a comprehensive list of options, look at the screen manual for
-#   details on everything that you can put in this file.
-#
+
 
 # ------------------------------------------------------------------------------
 # SCREEN SETTINGS
