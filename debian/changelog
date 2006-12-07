@@ -1,3 +1,12 @@
+xen-shell (0.6-1) stable; urgency=low
+
+  * New upstream release:
+    - improves detection of the correct guest.
+    - changes versioning system.
+    - works with non-GNU readline module.
+ 
+ -- Steve Kemp <steve@steve.org.uk>  Thu, 7 Dec 2006 16:29:02 +0000
+
 xen-shell (0.5-1) stable; urgency=low
 
   * New upstream release, adds the "passwd" command.
