@@ -13,9 +13,10 @@ xen-shell - Provide a console interface to control Xen guests.
 
   Options:
 
-   --help     Show brief help intstructions.
-   --manual   Show more complete help.
-   --version  Show the version of the software.
+   --control=   Specify which instance to control by default.
+   --help       Show brief help intstructions.
+   --manual     Show more complete help.
+   --version    Show the version of the software.
 
 =cut
 
@@ -111,7 +112,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.64 2006-12-29 00:16:47 steve Exp $
+ $Id: xen-shell,v 1.65 2006-12-29 10:21:06 steve Exp $
 
 =cut
 
@@ -142,7 +143,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '0.7';
-my $VERSION   = '$Revision: 1.64 $';
+my $VERSION   = '$Revision: 1.65 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -179,35 +180,35 @@ my %dispatch =
      },
    "help" =>
      {
-        sub => \&show_help,
+        sub => \&do_help,
        args => "[command]",
        help => "Show help about the specified command, or all commands if no command is specified.",
      },
    "list" =>
      {
-        sub => \&show_list,
+        sub => \&do_list,
        help => "Show the names of the Xen isntances you may control upon this host.",
      },
-  "passwd" =>
+   "passwd" =>
      {
         sub => \&do_password,
        help => "Change your login password.",
      },
-  "quit" =>   # Dupe: exit
+   "quit" =>   # Dupe: exit
      {
         sub => \&do_exit,
        help => "Exit this shell.",
-     },
-  "rdns" =>
-     {
-       sub  => \&do_rdns,
-       args => "[ipaddress some.host.name]",
-       help => "Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
      },
    "reboot" =>
      {
         sub => \&do_reboot,
        help => "Reboot the Xen guest.",
+     },
+   "rdns" =>
+     {
+       sub  => \&do_rdns,
+       args => "[ipaddress some.host.name]",
+       help => "Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
      },
    "reimage" =>
      {
@@ -226,42 +227,47 @@ my %dispatch =
      },
    "status" =>
      {
-        sub => \&show_status,
+        sub => \&do_status,
         help => "Show whether the Xen guest is running or not.",
      },
-  "top" =>
+   "top" =>
      {
         sub => \&do_top,
        help => "Show the list of running instances, their CPU usage, etc.",
      },
    "uptime" =>
      {
-        sub => \&show_uptime,
+        sub => \&do_uptime,
         help => "Show the uptime of the host & guest systems.",
      },
    "version" =>
      {
-        sub => \&show_version,
+        sub => \&do_version,
         help => "Show the version of this shell, and of Xen.",
      },
   );
 
 
 
+
 #
-# Find the username of the person running this script.
+# Find the user who is running this script.
 #
 my $USER = getpwuid( $REAL_USER_ID );
 
+
 #
-# The instances that user can control
+# The instances that the current user may control.
 #
 my @INSTANCES;
 
 #
-#  The currently active instance.
+#  The name of the instance currently being controlled.
 #
 my $ACTIVE = '';
+
+
+
 
 
 
@@ -315,9 +321,12 @@ exit;
 
 
 
+
+
+
 =begin doc
 
-  Parse any command line options which might be present
+  Parse any command line options which might be present.
 
 =end doc
 
@@ -409,6 +418,9 @@ sub sanityCheck
     # instances.
     #
     #
+    #  The sleep here is required to show people running terminal
+    # emulators, ssh clients, which close on exit.
+    #
     @INSTANCES = findInstancesFor( $USER );
     if ( ! @INSTANCES || scalar( @INSTANCES ) < 1 )
     {
@@ -419,8 +431,8 @@ sub sanityCheck
     }
 
     #
-    #  If the user only has one instance then we'll just make that
-    # the default.
+    #  If the user only has one instance under their control we'll
+    # default to controlling that one.
     #
     if ( scalar( @INSTANCES ) == 1 )
     {
@@ -528,6 +540,12 @@ sub findInstancesFor
 sub canControl
 {
     my( $inst ) = (@_);
+
+    #
+    #  Root can control any instance..
+    #
+    return 1 if ( $EFFECTIVE_USER_ID == 0 );
+
 
     #
     #  Test the instance is valid.
@@ -769,7 +787,10 @@ sub runMainLoop
 
 =begine doc
 
-  Return a suitable prompt string.
+  Return a suitable prompt for use by the shell.
+
+  The prompt varies depending on what kind of control the user has,
+ and which instance is being controlled.
 
 =end doc
 
@@ -796,15 +817,25 @@ sub getPrompt
 
 
 
+
+#
+#  Now we have the various handlers.
+#
+#  Handlers are listed alphabetically.
+#
+
+
+
+
 =begin doc
 
-  Show uptime of the guest.
+  Start the instance.
 
 =end doc
 
 =cut
 
-sub show_uptime
+sub do_boot
 {
     #
     #  Make sure we have an active machine.
@@ -822,56 +853,23 @@ EOF
         return;
     }
 
-
-    my $host_uptime = `uptime`;
-    chomp( $host_uptime );
-    print "Host : $host_uptime\n";
-
-    my $seconds = "";
-    my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
-
-    open( RUNNING, $cmd . "|" );
-    foreach my $line ( <RUNNING> )
-    {
-        if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
-        {
-            $seconds= $1;
-        }
-    }
-    close( RUNNING );
-
-    if ( defined( $seconds ) && length( $seconds ) )
-    {
-        my $days  = int($seconds/(24*60*60));
-        my $hours = ($seconds/(60*60))%24;
-        my $mins  = ($seconds/60)%60;
-        my $secs  = $seconds%60;
-
-        if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
-        if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
-        if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
-
-        print"Guest: $days days $hours:$mins:$secs\n";
-    }
-    else
-    {
-        print "Guest: Uptime not found for $ACTIVE\n";
-    }
+    print "Booting instance: $ACTIVE\n";
+    system( "sudo xm create $ACTIVE.cfg" );
+    print "Use 'console' to see the bootup messages.\n";
 }
+
 
 
 
 =begin doc
 
-  Show status of the Xen guest:  Running/Shutdown
-
-  If the guest is running then show its uptime too.
+  Connect to the serial console of the running Xen guest.
 
 =end doc
 
 =cut
 
-sub show_status
+sub do_console
 {
     #
     #  Make sure we have an active machine.
@@ -889,55 +887,65 @@ EOF
         return;
     }
 
+    print "Running console for $ACTIVE - exit with Ctrl+]\n";
+    print "(You might need to press return a couple of times to see activity.)\n\n";
+    system( "sudo xm console $ACTIVE" );
+    print "\n";
+}
 
-    my $running = 0;
 
-    #
-    # See if the instance is running
-    #
-    my $cmd = "sudo xm list $ACTIVE 2>/dev/null | grep $ACTIVE";
-    my $out = `$cmd`;
-    if ( length( $out ) ) { $running = 1; }
 
-    #
-    # Show state.
-    #
-    if ( $running )
+
+=begin doc
+
+  Mark a particular instance as being current.
+
+=end doc
+
+=cut
+
+sub do_control
+{
+    my ( $inst ) = ( @_ );
+
+    if ( canControl( $inst ) )
     {
-        print "Guest : Running\n";
-
-        my $seconds = "";
-        my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
-
-        open( RUNNING, $cmd . "|" );
-        foreach my $line ( <RUNNING> )
-        {
-            if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
-            {
-                $seconds= $1;
-            }
-        }
-        close( RUNNING );
-
-        if ( defined( $seconds ) && length( $seconds ) )
-        {
-            my $days  = int($seconds/(24*60*60));
-            my $hours = ($seconds/(60*60))%24;
-            my $mins  = ($seconds/60)%60;
-            my $secs  = $seconds%60;
-
-            if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
-            if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
-            if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
-
-            print"Uptime: $days days $hours:$mins:$secs\n";
-        }
+        print "Controlling: $inst\n";
+        $ACTIVE = $inst;
     }
     else
     {
-        print "Guest: Shutdown\n";
+        print "The instance was not found, or you are not allowed to control it.\n";
     }
 }
+
+
+
+
+=begin doc
+
+ Exit this shell, first saving any command history.
+
+=end doc
+
+=cut
+
+sub do_exit
+{
+    my $file = $ENV{'HOME'} . "/" . ".xen-shell";
+
+    #
+    #  Save the history if the term module can.
+    #
+    if ( UNIVERSAL::can( $term, 'WriteHistory' ) )
+    {
+        $term->WriteHistory( $file );
+    }
+
+    exit;
+}
+
+
 
 
 
@@ -954,7 +962,7 @@ EOF
 
 =cut
 
-sub show_help
+sub do_help
 {
     my ( $term ) = ( @_ );
 
@@ -1028,6 +1036,8 @@ E_O_HELP
 
 
 
+
+
 =begin doc
 
   Show the user the names of the Xen instances they may control.
@@ -1036,7 +1046,7 @@ E_O_HELP
 
 =cut
 
-sub show_list
+sub do_list
 {
     print "You may control the following Xen instances:\n\n";
 
@@ -1050,45 +1060,137 @@ sub show_list
 
 
 
+
+
 =begin doc
 
-  Show the user the version of this shell, and of the Xen software installed.
+  Allow the user to change their login password, if password-based
+ authentication is in use.
+
+  Note this function is disabled if ~/.ssh/authorized_keys is present.
 
 =end doc
 
 =cut
 
-sub show_version
+sub do_password
 {
-    my $xen = "";
-
-    my $cmd     = "sudo xm info 2>/dev/null";
-
-    open( INFO, $cmd . "|" );
-    foreach my $line ( <INFO> )
-    {
-        if ( $line =~ /^xen_major.*: (.*)$/ )
-        {
-            $xen .= $1;
-        }
-        if ( $line =~ /^xen_minor.*: (.*)$/ )
-        {
-            $xen .= "." . $1;
-        }
-        if ( $line =~ /^xen_extra.*: (.*)$/ )
-        {
-            $xen .= $1;
-        }
-    }
-    close( INFO );
-    print "xen-shell $RELEASE.$VERSION";
-    if ( length( $xen ) )
-    {
-        print " running on Xen version $xen";
-    }
-
-    print "\n";
+    system( "passwd" );
 }
+
+
+
+
+=begin doc
+
+  Reboot the Xen guest.
+
+=end doc
+
+=cut
+
+sub do_reboot
+{
+    #
+    #  Make sure we have an active machine.
+    #
+    if ( !length( $ACTIVE ) )
+    {
+        print <<EOF;
+
+ Please specify which instance you wish to run this command against.
+
+ Use "list" to display available instances, and "control" to select
+ one.
+
+EOF
+        return;
+    }
+
+    print "Rebooting instance: $ACTIVE\n";
+    system( "sudo xm reboot $ACTIVE" );
+}
+
+
+
+
+=begin doc
+
+  Allow the machine to be reinitialised to a fresh installation of
+ their Xen guest.
+
+  This ultimately invokes ~$USER/image.sh to do the work.
+
+=end doc
+
+=cut
+
+sub do_reimage
+{
+    if (! -x "/home/$USER/image.sh" )
+    {
+        print "There is no reimaging script for user $USER\n";
+        print "Skipping.\n";
+        return;
+    }
+
+
+    #
+    #  Make sure we have an active machine.
+    #
+    if ( !length( $ACTIVE ) )
+    {
+        print <<EOF;
+
+ Please specify which instance you wish to run this command against.
+
+ Use "list" to display available instances, and "control" to select
+ one.
+
+EOF
+        return;
+    }
+
+    print "Reimaging instance: $ACTIVE\n";
+
+    #
+    # See if the instance is running
+    #
+    my $running = 0;
+    my $cmd = "sudo xm list $ACTIVE 2>/dev/null | grep $ACTIVE";
+    my $out = `$cmd`;
+    if ( length( $out ) )
+    {
+        print "Xen guest running.\n";
+        print "Please run 'shutdown' first\n";
+        return;
+    }
+    else
+    {
+        print "Machine not running, proceeding\n";
+    }
+
+
+    #
+    #  Run the xm-reimage, either from /usr/bin, or /usr/local/bin.
+    #
+    if ( -x "/usr/bin/xm-reimage" )
+    {
+        system( "/usr/bin/xm-reimage $ACTIVE" );
+        print "You may now boot your installation\n";
+    }
+    elsif ( -x "/usr/local/bin/xm-reimage" )
+    {
+        system( "/usr/local/bin/xm-reimage $ACTIVE" );
+        print "You may now boot your installation\n";
+    }
+    else
+    {
+        print "ERROR:  'xm-reimage' not found.\n";
+        print "ERROR:  Please report this as a bug to your server admin.\n";
+    }
+}
+
 
 
 
@@ -1182,132 +1284,6 @@ sub do_rdns
 
 
 
-=begin doc
-
-  Show Xen top information.
-
-=end doc
-
-=cut
-
-sub do_top
-{
-    system( "sudo xm top" );
-    system( "clear" );
-}
-
-
-
-=begin doc
-
-  Reboot the Xen guest.
-
-=end doc
-
-=cut
-
-sub do_reboot
-{
-    #
-    #  Make sure we have an active machine.
-    #
-    if ( !length( $ACTIVE ) )
-    {
-        print <<EOF;
-
- Please specify which instance you wish to run this command against.
-
- Use "list" to display available instances, and "control" to select
- one.
-
-EOF
-        return;
-    }
-
-    print "Rebooting instance: $ACTIVE\n";
-    system( "sudo xm reboot $ACTIVE" );
-}
-
-
-
-=begin doc
-
-  Allow the machine to be reinitialised to a fresh installation of
- their Xen guest.
-
-  This ultimately invokes ~$USER/image.sh to do the work.
-
-=end doc
-
-=cut
-
-sub do_reimage
-{
-    if (! -x "/home/$USER/image.sh" )
-    {
-        print "There is no reimaging script for user $USER\n";
-        print "Skipping.\n";
-        return;
-    }
-
-
-    #
-    #  Make sure we have an active machine.
-    #
-    if ( !length( $ACTIVE ) )
-    {
-        print <<EOF;
-
- Please specify which instance you wish to run this command against.
-
- Use "list" to display available instances, and "control" to select
- one.
-
-EOF
-        return;
-    }
-
-    print "Reimaging instance: $ACTIVE\n";
-
-    #
-    # See if the instance is running
-    #
-    my $running = 0;
-    my $cmd = "sudo xm list $ACTIVE 2>/dev/null | grep $ACTIVE";
-    my $out = `$cmd`;
-    if ( length( $out ) )
-    {
-        print "Xen guest running.\n";
-        print "Please run 'shutdown' first\n";
-        return;
-    }
-    else
-    {
-        print "Machine not running, proceeding\n";
-    }
-
-
-    #
-    #  Run the xm-reimage, either from /usr/bin, or /usr/local/bin.
-    #
-    if ( -x "/usr/bin/xm-reimage" )
-    {
-        system( "/usr/bin/xm-reimage $ACTIVE" );
-        print "You may now boot your installation\n";
-    }
-    elsif ( -x "/usr/local/bin/xm-reimage" )
-    {
-        system( "/usr/local/bin/xm-reimage $ACTIVE" );
-        print "You may now boot your installation\n";
-    }
-    else
-    {
-        print "ERROR:  'xm-reimage' not found.\n";
-        print "ERROR:  Please report this as a bug to your server admin.\n";
-    }
-}
-
-
 
 =begin doc
 
@@ -1341,15 +1317,19 @@ EOF
 
 
 
+
+
 =begin doc
 
-  Start the instance.
+  Show status of the Xen guest:  Running/Shutdown
+
+  If the guest is running then show its uptime too.
 
 =end doc
 
 =cut
 
-sub do_boot
+sub do_status
 {
     #
     #  Make sure we have an active machine.
@@ -1367,47 +1347,86 @@ EOF
         return;
     }
 
-    print "Booting instance: $ACTIVE\n";
-    system( "sudo xm create $ACTIVE.cfg" );
-    print "Use 'console' to see the bootup messages.\n";
-}
 
+    my $running = 0;
 
+    #
+    # See if the instance is running
+    #
+    my $cmd = "sudo xm list $ACTIVE 2>/dev/null | grep $ACTIVE";
+    my $out = `$cmd`;
+    if ( length( $out ) ) { $running = 1; }
 
-=begin doc
-
-  Mark a particular instance as being current.
-
-=end doc
-
-=cut
-
-sub do_control
-{
-    my ( $inst ) = ( @_ );
-
-    if ( canControl( $inst ) )
+    #
+    # Show state.
+    #
+    if ( $running )
     {
-        print "Controlling: $inst\n";
-        $ACTIVE = $inst;
+        print "Guest : Running\n";
+
+        my $seconds = "";
+        my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
+
+        open( RUNNING, $cmd . "|" );
+        foreach my $line ( <RUNNING> )
+        {
+            if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
+            {
+                $seconds= $1;
+            }
+        }
+        close( RUNNING );
+
+        if ( defined( $seconds ) && length( $seconds ) )
+        {
+            my $days  = int($seconds/(24*60*60));
+            my $hours = ($seconds/(60*60))%24;
+            my $mins  = ($seconds/60)%60;
+            my $secs  = $seconds%60;
+
+            if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
+            if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
+            if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
+
+            print"Uptime: $days days $hours:$mins:$secs\n";
+        }
     }
     else
     {
-        print "The instance was not found, or you are not allowed to control it.\n";
+        print "Guest: Shutdown\n";
     }
 }
 
 
 
+
 =begin doc
 
-  Connect to the serial console of the running Xen guest.
+  Show Xen top information.
 
 =end doc
 
 =cut
 
-sub do_console
+sub do_top
+{
+    system( "sudo xm top" );
+    system( "clear" );
+}
+
+
+
+
+
+=begin doc
+
+  Show uptime of the guest.
+
+=end doc
+
+=cut
+
+sub do_uptime
 {
     #
     #  Make sure we have an active machine.
@@ -1425,54 +1444,87 @@ EOF
         return;
     }
 
-    print "Running console for $ACTIVE - exit with Ctrl+]\n";
-    print "(You might need to press return a couple of times to see activity.)\n\n";
-    system( "sudo xm console $ACTIVE" );
+
+    my $host_uptime = `uptime`;
+    chomp( $host_uptime );
+    print "Host : $host_uptime\n";
+
+    my $seconds = "";
+    my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
+
+    open( RUNNING, $cmd . "|" );
+    foreach my $line ( <RUNNING> )
+    {
+        if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
+        {
+            $seconds= $1;
+        }
+    }
+    close( RUNNING );
+
+    if ( defined( $seconds ) && length( $seconds ) )
+    {
+        my $days  = int($seconds/(24*60*60));
+        my $hours = ($seconds/(60*60))%24;
+        my $mins  = ($seconds/60)%60;
+        my $secs  = $seconds%60;
+
+        if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
+        if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
+        if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
+
+        print"Guest: $days days $hours:$mins:$secs\n";
+    }
+    else
+    {
+        print "Guest: Uptime not found for $ACTIVE\n";
+    }
+}
+
+
+
+
+=begin doc
+
+  Show the user the version of this shell, and of the Xen software installed.
+
+=end doc
+
+=cut
+
+sub do_version
+{
+    my $xen = "";
+    my $cmd = "sudo xm info 2>/dev/null";
+
+    open( INFO, $cmd . "|" );
+    foreach my $line ( <INFO> )
+    {
+        if ( $line =~ /^xen_major.*: (.*)$/ )
+        {
+            $xen .= $1;
+        }
+        if ( $line =~ /^xen_minor.*: (.*)$/ )
+        {
+            $xen .= "." . $1;
+        }
+        if ( $line =~ /^xen_extra.*: (.*)$/ )
+        {
+            $xen .= $1;
+        }
+    }
+    close( INFO );
+    print "xen-shell $RELEASE.$VERSION";
+    if ( length( $xen ) )
+    {
+        print " running on Xen version $xen";
+    }
+
     print "\n";
 }
 
 
 
-=begin doc
-
-  Allow the user to change their login password, if password-based
- authentication is in use.
-
-  Note this function is disabled if ~/.ssh/authorized_keys is present.
-
-=end doc
-
-=cut
-
-sub do_password
-{
-    system( "passwd" );
-}
-
-
-
-=begin doc
-
- Exit this shell, first saving any command history.
-
-=end doc
-
-=cut
-
-sub do_exit
-{
-    my $file = $ENV{'HOME'} . "/" . ".xen-shell";
-
-    #
-    #  Save the history if the term module can.
-    #
-    if ( UNIVERSAL::can( $term, 'WriteHistory' ) )
-    {
-        $term->WriteHistory( $file );
-    }
-
-    exit;
-}
 
 
 
@@ -1493,7 +1545,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.64 2006-12-29 00:16:47 steve Exp $
+ $Id: xen-shell,v 1.65 2006-12-29 10:21:06 steve Exp $
 
 =cut
 
