@@ -112,7 +112,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.67 2006-12-29 16:43:18 steve Exp $
+ $Id: xen-shell,v 1.68 2006-12-30 11:06:34 steve Exp $
 
 =cut
 
@@ -143,7 +143,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '0.7';
-my $VERSION   = '$Revision: 1.67 $';
+my $VERSION   = '$Revision: 1.68 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -153,7 +153,8 @@ if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 #  Dispatch table which contains the mapping between the commands
 # we make available and the routine which implements that behaviour.
 #
-#  The help-text is also specified here.
+#  This table also contains both the long and the short form of each
+# commands help text.
 #
 #
 my %dispatch =
@@ -162,88 +163,105 @@ my %dispatch =
      {
         sub => \&do_boot,
        help => "Start the Xen guest, if it is not running.",
+       info => "Boot your Xen guest.",
      },
    "control" =>
      {
         sub => \&do_control,
        help => "Take control of a particular instance.",
+       info => "Specify which instance all commands apply.",
      },
    "console" =>
      {
         sub => \&do_console,
        help => "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
+       info => "Gain access to your Xen guest via the serial console.",
      },
    "exit" =>
      {
         sub => \&do_exit,
        help => "Exit this shell.",
+       info => "Exit this shell.",
      },
    "help" =>
      {
         sub => \&do_help,
        args => "[command]",
        help => "Show help about the specified command, or all commands if no command is specified.",
+       info => "Show general, or command-specific, help information.",
      },
    "list" =>
      {
         sub => \&do_list,
-       help => "Show the names of the Xen isntances you may control upon this host.",
+       help => "Show the names of the Xen instances you may control upon this host.",
+       info => "List Xen instances which you may control",
      },
    "passwd" =>
      {
         sub => \&do_password,
        help => "Change your login password.",
+       info => "Change the password used to access this host.",
      },
    "quit" =>   # Dupe: exit
      {
         sub => \&do_exit,
        help => "Exit this shell.",
+       info => "Exit this shell.",
      },
    "reboot" =>
      {
         sub => \&do_reboot,
        help => "Reboot the Xen guest.",
+       info => "Reboot your Xen guest.",
      },
    "rdns" =>
      {
        sub  => \&do_rdns,
        args => "[ipaddress some.host.name]",
        help => "Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
+       info => "Setup reverse DNS for allocated IP addresses",
      },
    "reimage" =>
      {
         sub => \&do_reimage,
        help => "Erase your Xen guest and reinitialise it to a fresh installation of Sarge.",
+       info => "Reset your system to a pristine installation.",
      },
    "serial" => # Dupe: console
      {
         sub => \&do_console,
        help => "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
+       info => "Gain access to your Xen guest via the serial console.",
      },
    "shutdown" =>
      {
         sub => \&do_shutdown,
        help => "Shutdown the Xen guest.",
+       info => "Shutdown your Xen guest.",
      },
    "status" =>
      {
-        sub => \&do_status,
+        sub  => \&do_status,
         help => "Show whether the Xen guest is running or not.",
+        info => "Show the status of your Xen guest.",
      },
    "top" =>
      {
         sub => \&do_top,
        help => "Show the list of running instances, their CPU usage, etc.",
+       info => "Show system resource usage.",
      },
    "uptime" =>
      {
-        sub => \&do_uptime,
+        sub  => \&do_uptime,
         help => "Show the uptime of the host & guest systems.",
+        info => "Show the uptime information of your guest system and this host.",
      },
    "version" =>
      {
         sub => \&do_version,
         help => "Show the version of this shell, and of Xen.",
+        info => "Show the version of this shell, and of Xen.",
      },
   );
 
@@ -919,7 +937,7 @@ sub do_boot
 sub do_console
 {
 
-    print "Running console for $ACTIVE - exit with Ctrl+]\n";
+    print "\nRunning console for $ACTIVE - exit with Ctrl+]\n";
     print "(You might need to press return a couple of times to see activity.)\n\n";
     system( "sudo xm console $ACTIVE" );
     print "\n";
@@ -1015,7 +1033,6 @@ sub do_help
     {
         foreach my $cmd ( split( /[ \t]/, $term ) )
         {
-
             # Lookup command in our dispatch table.
             my $c = $dispatch{ lc( $cmd ) };
             if ( $c )
@@ -1035,44 +1052,27 @@ sub do_help
         return;
     }
 
-    my $help =<<E_O_HELP;
-
-xen-shell v$RELEASE.$VERSION
-
-The following commands are available within this shell:
-
-  boot      Boot your Xen guest.
-  console   Gain access to your Xen guest via the serial console.
-  control   Specify which instance all commands apply.
-  exit      Exit this shell.
-  help      Show general, or command-specific, help information.
-  list      List Xen instances which you may control.
-  rdns      Setup Reverse DNS for allocated IP addresses
-  reboot    Reboot your Xen guest.
-  reimage   Reset your system to a pristine installation of Sarge.
-  shutdown  Shut down your Xen guest.
-  status    Show the status of your Xen guest.
-  top       Show system resource usage.
-  uptime    Show the uptime information of the host and guest systems.
-  version   Show the version of this shell, and of Xen.
-
-  For command-specific help run "help command".
-
-E_O_HELP
 
     #
-    #  Remove rdns + reimage if they are disabled.
+    #  Header
     #
-    if ( !defined( $dispatch{'rdns' } ) )
+    print "xen-shell v$RELEASE.$VERSION\n\n";
+    print "The following commands are available within this shell:\n\n";
+
+    #
+    #  Build up the short-help, indented it nicely.
+    #
+    foreach my $entry ( sort keys %dispatch )
     {
-        $help =~ s/[ \t]*rdns.*\n//gm;
-    }
-    if ( !defined( $dispatch{'reimage' } ) )
-    {
-        $help =~ s/[ \t]*reimage.*\n//gm;
+        my $hash = $dispatch{$entry};
+
+        print sprintf( "%10s - %s\n", $entry, $hash->{'info'} );
     }
 
-    print $help;
+    #
+    #  Footer.
+    #
+    print "\nFor command-specific help run \"help command\".\n\n";
 
 }
 
@@ -1538,7 +1538,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.67 2006-12-29 16:43:18 steve Exp $
+ $Id: xen-shell,v 1.68 2006-12-30 11:06:34 steve Exp $
 
 =cut
 
