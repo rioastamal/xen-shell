@@ -24,12 +24,9 @@ xen-shell - Provide a console interface to control Xen guests.
 =head1 DESCRIPTION
 
   xen-shell provides a simple console interface to allow a user to
- control a single Xen instance which is running upon the localhost.
+ control a Xen instances which are running upon the local system.
 
-  The Xen instance is assumed to have the same name as the users login
- name, and will not work if that isn't the case.
-
-  Features include:
+  The shell features include:
 
 =over 8
 
@@ -40,6 +37,37 @@ xen-shell - Provide a console interface to control Xen guests.
 =item The ability to run within GNU Screen to allow long-running jobs to be completed "offline".
 
 =back
+ 
+
+=cut
+
+
+=head1 XEN SETUP
+
+  There are two ways to setup a Xen guest which might be controlled by
+ the local user "bob".
+
+  The simplest method is to give a Xen instance the name "bob", (i.e.
+ a Xen domU which has the same name as the login account of the user
+ who is allowed to control it.), this has the downside that a local
+ user may only control a single instance.
+
+  The second solution is to add a line such as the following to the
+ relevant Xen guest configuration file beneath /etc/xen:
+
+=for example begin
+
+  xen_shell = 'bob, steve, chris'
+
+=for example end
+
+  This line, which will be ignored by Xen itself, will allow the Xen
+ shell to be used by the three local users "bob", "steve", and "chris" -
+ and each of them will be able to work with that host.
+
+  If a user is allowed to control more than one Xen guest upon the
+ current host then the two commands "control" and "list" will be made
+ available to them.
 
 =cut
 
@@ -54,9 +82,10 @@ xen-shell - Provide a console interface to control Xen guests.
  write your own script - perhaps to invoke "xen-create-image" to do
  the real job.
 
-  A sample script looks like this:
+  A sample script, ~skx/image.sh, might look like this:
 
 =for example begin
+
    #!/bin/sh
    #
    # Reimaging script for the user skx.
@@ -77,8 +106,8 @@ xen-shell - Provide a console interface to control Xen guests.
 
   This shell contains a built-in system for allowing a Xen-shell user to
  manipulate reverse DNS entries for IP addresses.  The shell itself doesn't
- do this, instead a user will manipulate a simple text file in their home
- directory.
+ do this directly, instead the shell will manipulate a simple text file
+ in a users home directory.
 
   Create the file /home/$USER/ips.txt with contents of the following form:
 
@@ -86,7 +115,7 @@ xen-shell - Provide a console interface to control Xen guests.
 
    192.168.1.1 foo.my.flat
    192.168.1.2 bar.my.flat
-   192.168.1.3 baz.my.flta
+   192.168.1.3 baz.my.flat
 
 =for example end
 
@@ -94,7 +123,7 @@ xen-shell - Provide a console interface to control Xen guests.
  that user.  The "rdns" command, when executed with no arguments will
  simply display this file.
 
-  When the user attempts to set reverse DNS the file will be updated.
+  When the user attempts to set reverse DNS this file will be updated.
 
   It is assumed you will have your own cronjob to actually read these
  files and perform the DNS updates, the shell support is just half the
@@ -112,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.70 2007-01-01 17:01:29 steve Exp $
+ $Id: xen-shell,v 1.71 2007-01-01 22:54:41 steve Exp $
 
 =cut
 
@@ -143,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '0.8';
-my $VERSION   = '$Revision: 1.70 $';
+my $VERSION   = '$Revision: 1.71 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -361,10 +390,10 @@ sub parseCommandLineArguments
     #  Parse options.
     #
     GetOptions(
-               "help",         \$SHOW_HELP,
-               "manual",       \$SHOW_MANUAL,
-               "version",      \$SHOW_VERSION,
-               "control=s",   \$INITIAL_ACTIVE,
+               "help",      \$SHOW_HELP,
+               "manual",    \$SHOW_MANUAL,
+               "version",   \$SHOW_VERSION,
+               "control=s", \$INITIAL_ACTIVE,
              );
 
     pod2usage(1) if $SHOW_HELP;
@@ -377,7 +406,8 @@ sub parseCommandLineArguments
     }
 
     #
-    #   Set the initially controlled instance, if specified.
+    #   Set the initially controlled instance, if specified and if
+    # the user actually has permission to control it.
     #
     if ( length( $INITIAL_ACTIVE ) )
     {
@@ -390,9 +420,13 @@ sub parseCommandLineArguments
 
 =begin doc
 
- Sanity check that we can load the Perl modules we require.
+  Sanity check that we can load the Perl modules we require.
 
- Also make sure the current user has a Xen guest on this host machine.
+  Also make sure the current user has a Xen guest on this host machine.
+
+  Note that if we detect errors we will sleep for a while after displaying
+ them - this is to allow users of PuTTY (which will close a window
+ on disconnection) to see them before they are logged out.
 
 =end doc
 
@@ -435,9 +469,6 @@ sub sanityCheck
     #  We parse each file beneath /etc/xen and look for suitable
     # instances.
     #
-    #
-    #  The sleep here is required to show people running terminal
-    # emulators, ssh clients, which close on exit.
     #
     @INSTANCES = findInstancesFor( $USER );
     if ( ! @INSTANCES || scalar( @INSTANCES ) < 1 )
@@ -608,10 +639,7 @@ EOF
     #  Sanity check - ensure the user can control the
     # selected instance.  This should never fail.
     #
-    if ( ! canControl( $ACTIVE ) )
-    {
-        return 0;
-    }
+    return 0 if ( ! canControl( $ACTIVE ) );
 
     #
     #  The user is OK to operate the relevant command
@@ -632,6 +660,7 @@ EOF
     - We remove "rdns" if ~/ips.txt is missing or non-writable.
     - We remove "reimage" if ~/image.sh isn't present and executable.
     - We remove "passwd" if ~/.ssh/authorized_keys is present and non-empty.
+    - We remove "list" + "control" if the user can only access one Xen guest.
 
 =end doc
 
@@ -672,7 +701,7 @@ sub removeCommands
     #  If the user can only control one instance then there is
     # no need for "control" and "list".
     #
-    if ( scalar( @INSTANCES ) == 1 )
+    if ( scalar( @INSTANCES ) < 2 )
     {
         $dispatch{ 'control' } = undef;
         delete( $dispatch{ 'control' } );
@@ -815,7 +844,7 @@ sub runMainLoop
         $line =~ s/^\s+//;
         $line =~ s/\s+$//;
 
-        # If we have arguements then split them up.
+        # If we have arguments then split them up.
         my ($word, @args) = split( /[ \t]/, $line );
 
         # Lookup command in our dispatch table.
@@ -852,7 +881,8 @@ sub runMainLoop
         }
 
         #
-        #  Update the prompt
+        #  Update the prompt - required in the case where the user
+        # has switched control to another instance.
         #
         $prompt = getPrompt();
     }
@@ -860,7 +890,7 @@ sub runMainLoop
 
 
 
-=begine doc
+=begin doc
 
   Return a suitable prompt for use by the shell.
 
@@ -879,8 +909,7 @@ sub getPrompt
     return "xen-shell> " if ( scalar( @INSTANCES ) == 1 );
 
     #
-    #  If there is more than one, then show the currently
-    # active one if one is active..
+    #  If there is an active instance then include that in the prompt.
     #
     return "xen-shell[$ACTIVE]> " if ( length( $ACTIVE ) );
 
@@ -893,18 +922,20 @@ sub getPrompt
 
 
 
-#
+##
 #  Now we have the various handlers.
 #
-#  Handlers are listed alphabetically.
+#  Handlers are listed alphabetically with each handler having a function
+# named "do_" + command-name.
 #
+##
 
 
 
 
 =begin doc
 
-  Start the instance.
+  Boot the Xen guest instance.
 
 =end doc
 
@@ -941,7 +972,9 @@ sub do_console
 
     print "\nRunning console for $ACTIVE - exit with Ctrl+]\n";
     print "(You might need to press return a couple of times to see activity.)\n\n";
+
     system( "sudo xm console $ACTIVE" );
+
     print "\n";
 }
 
@@ -1094,10 +1127,7 @@ sub do_list
 {
     print "You may control the following Xen instances:\n\n";
 
-    foreach my $inst ( @INSTANCES )
-    {
-        print "\t$inst\n";
-    }
+    map( {print "\t$_\n" } @INSTANCES );
 
     print "\n(Use 'control' to take control of a particular instance.)\n";
 }
@@ -1358,9 +1388,9 @@ sub do_status
     #
     # See if the instance is running
     #
-    my $cmd = "sudo xm list $ACTIVE 2>/dev/null | grep $ACTIVE";
-    my $out = `$cmd`;
-    if ( length( $out ) ) { $running = 1; }
+    my $cmd  = "sudo xm list $ACTIVE 2>/dev/null | grep $ACTIVE";
+    my $out  = `$cmd`;
+    $running = 1 if ( length( $out ) );
 
     #
     # Show state.
@@ -1393,7 +1423,7 @@ sub do_status
             if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
             if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
 
-            print"Uptime: $days days $hours:$mins:$secs\n";
+            print "Uptime: $days days $hours:$mins:$secs\n";
         }
     }
     else
@@ -1468,7 +1498,7 @@ sub do_uptime
         if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
         if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
 
-        print"Guest: $days days $hours:$mins:$secs\n";
+        print "Guest: $days days $hours:$mins:$secs\n";
     }
     else
     {
@@ -1540,7 +1570,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.70 2007-01-01 17:01:29 steve Exp $
+ $Id: xen-shell,v 1.71 2007-01-01 22:54:41 steve Exp $
 
 =cut
 
