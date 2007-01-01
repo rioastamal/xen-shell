@@ -1,3 +1,11 @@
+xen-shell (0.8-1) stable; urgency=low
+
+  * New upstream release:
+    - The user may control multiple Xen guests.
+    - Added "list" + "control" commands.
+
+ -- Steve Kemp <steve@steve.org.uk>  Mon, 01 Jan 2007 17:02:21 +0000
+
 xen-shell (0.7-1) stable; urgency=low
 
   * New upstream release:
