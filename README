@@ -126,6 +126,26 @@ XENUSERS     ALL      = NOPASSWD: XEN,XENIMG
  execute "xen-create-image" if you use that too.
 
 
+Specifying Hosts
+----------------
+
+  The xen shell allows a user to control multiple Xen guests.  To specify
+ which host a user can control you should ensure that your xen configuration
+ files, beneath /etc/xen, contain the following:
+
+   name      = 'my.host.name'
+   xen_shell = 'bob, steve, skx'
+
+  If the name of a host matches a users login name they will be allowed
+ to control that instance.  Otherwise if their login name appears in the
+ "xen_shell" line they will be able to control it.
+
+  If a user is allowed to control multiple hosts then the "control" and
+ "list" commands will be enabled for them.
+
+
+
+
 Steve
 -- 
 [steve@steve.org.uk]
