@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.71 2007-01-01 22:54:41 steve Exp $
+ $Id: xen-shell,v 1.72 2007-02-07 11:33:00 steve Exp $
 
 =cut
 
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '0.8';
-my $VERSION   = '$Revision: 1.71 $';
+my $VERSION   = '$Revision: 1.72 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -1231,12 +1231,12 @@ sub do_reimage
     #
     if ( -x "/usr/bin/xm-reimage" )
     {
-        system( "/usr/bin/xm-reimage $ACTIVE" );
+        system( "/usr/bin/xm-reimage $ACTIVE $USER" );
         print "You may now boot your installation\n";
     }
     elsif ( -x "/usr/local/bin/xm-reimage" )
     {
-        system( "/usr/local/bin/xm-reimage $ACTIVE" );
+        system( "/usr/local/bin/xm-reimage $ACTIVE $USER" );
         print "You may now boot your installation\n";
     }
     else
@@ -1570,7 +1570,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.71 2007-01-01 22:54:41 steve Exp $
+ $Id: xen-shell,v 1.72 2007-02-07 11:33:00 steve Exp $
 
 =cut
 

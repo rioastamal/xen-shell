@@ -9,16 +9,22 @@
 #
 host=$1
 if [ -z "${host}" ]; then
-    echo "Usage: $0 host"
+    echo "Usage: $0 host user"
     exit
+fi
+
+user=$2
+if [ -z "${user}" ]; then
+     echo "Usage: $0 host user"
+     exit
 fi
 
 #
 #  Make sure that the image.sh script exists.  We shouldn't have been
 # called if that wasn't the case .. but ..
 #
-if [ ! -x /home/${host}/image.sh ]; then
-    echo "The user ${host} does not have an executable reimaging script"
+if [ ! -x /home/${user}/image.sh ]; then
+    echo "The user ${user} does not have an executable reimaging script"
     exit
 fi
 
@@ -74,7 +80,7 @@ echo -e "\nCommitted."
 #
 #  Run the reimage script.
 #
-/home/${host}/image.sh
+/home/${user}/image.sh
 
 
 #
@@ -127,7 +133,7 @@ xm-reimage - Prompt for confirmation and run a per-user reimage script
  --
  http://www.steve.org.uk/
 
- $Id: xm-reimage,v 1.5 2006-12-05 10:12:19 steve Exp $
+ $Id: xm-reimage,v 1.6 2007-02-07 11:33:00 steve Exp $
 
 =cut
 
