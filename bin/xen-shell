@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.73 2007-02-23 14:02:18 steve Exp $
+ $Id: xen-shell,v 1.74 2007-02-24 01:32:46 steve Exp $
 
 =cut
 
@@ -171,8 +171,8 @@ use Pod::Usage;
 #
 #  Version number of this script, taken from the CVS revision number.
 #
-my $RELEASE   = '0.8';
-my $VERSION   = '$Revision: 1.73 $';
+my $RELEASE   = '0.9';
+my $VERSION   = '$Revision: 1.74 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -1575,7 +1575,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.73 2007-02-23 14:02:18 steve Exp $
+ $Id: xen-shell,v 1.74 2007-02-24 01:32:46 steve Exp $
 
 =cut
 

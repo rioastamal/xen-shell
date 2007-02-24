@@ -1,3 +1,12 @@
+xen-shell (0.9-1) stable; urgency=low
+
+  * New upstream release:
+    - The list of instances a user may control now shows only unique names.
+    - Many minor spelling and documentation updates.
+    - Added reference to the two mailing lists we use.
+
+ -- Steve Kemp <steve@steve.org.uk>  Sat, 24 Feb 2007 01:32:28 +0000
+
 xen-shell (0.8-1) stable; urgency=low
 
   * New upstream release:
