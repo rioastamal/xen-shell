@@ -141,14 +141,14 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.75 2007-02-26 15:01:26 steve Exp $
+ $Id: xen-shell,v 1.76 2007-03-01 15:36:29 steve Exp $
 
 =cut
 
 
 =head1 LICENSE
 
-Copyright (c) 2005-2006 by Steve Kemp.  All rights reserved.
+Copyright (c) 2005-2007 by Steve Kemp.  All rights reserved.
 
 This module is free software;
 you can redistribute it and/or modify it under
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '0.9';
-my $VERSION   = '$Revision: 1.75 $';
+my $VERSION   = '$Revision: 1.76 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -1575,7 +1575,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.75 2007-02-26 15:01:26 steve Exp $
+ $Id: xen-shell,v 1.76 2007-03-01 15:36:29 steve Exp $
 
 =cut
 

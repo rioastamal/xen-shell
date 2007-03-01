@@ -2,6 +2,10 @@
 #
 #  Reimage the current machine.
 #
+# Steve
+# --
+# $Id: xm-reimage,v 1.7 2007-03-01 15:36:29 steve Exp $
+#
 
 
 #
@@ -87,65 +91,3 @@ echo -e "\nCommitted."
 #  End of this script
 #
 exit
-
-
-###
-#
-#  Everything from here down is POD documentation, as used in Perl.
-# the reason this is here is so that we can generate a manpage easily.
-#
-####
-
-
-
-=head1 NAME
-
-xm-reimage - Prompt for confirmation and run a per-user reimage script
-
-=cut
-
-
-=head1 SYNOPSIS
-
-  xm-reimage USERNAME
-
-  This script accepts no other command line arguments, or flags.
-
-=cut
-
-
-=head1 DESCRIPTION
-
-  xm-reimage is invoked by the xen-shell when a user selects the
- "reimage" command.
-
-  This script will prompt for confirmation, display a count-down to
- allow one last chance, then invoke ~$USERNAME/image.sh
-
-  If the "image.sh" script does not exist, or is not executable then
- this script should never be invoked.
-
-=cut
-
-=head1 AUTHOR
-
- Steve
- --
- http://www.steve.org.uk/
-
- $Id: xm-reimage,v 1.6 2007-02-07 11:33:00 steve Exp $
-
-=cut
-
-
-=head1 LICENSE
-
-Copyright (c) 2005-2006 by Steve Kemp.  All rights reserved.
-
-This module is free software;
-you can redistribute it and/or modify it under
-the same terms as Perl itself.
-The LICENSE file contains the full text of the license.
-
-=cut
-

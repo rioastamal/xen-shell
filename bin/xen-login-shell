@@ -6,7 +6,7 @@
 #
 # Steve
 # --
-# $Id: xen-login-shell,v 1.6 2006-12-07 14:47:24 steve Exp $
+# $Id: xen-login-shell,v 1.7 2007-03-01 15:36:28 steve Exp $
 
 
 #
@@ -107,80 +107,4 @@ screen -d -R -c ${screenrc} -e^Aa -s ${xs}  -S $USER
 exit
 
 
-
-###
-#
-#  Everything from here down is POD documentation, as used in Perl.
-# the reason this is here is so that we can generate a manpage easily.
-#
-####
-
-
-
-=head1 NAME
-
-xen-login-shell - A login shell to allow a user to control a Xen guest.
-
-=cut
-
-
-=head1 SYNOPSIS
-
-  xen-login-shell
-
-  This script accepts no command line arguments, or flags.
-
-=cut
-
-
-=head1 DESCRIPTION
-
-  xen-login-shell is designed to be a simple wrapper around the xen-shell
- program.  This script should be set as the login-shell for any user who
- is supposed to control a single Xen instance which is named after their
- login name.
-
-  The reason this script is set as the login shell is so that GNU Screen
- can be invoked to allow users to disconnect/reconnect to the real
- shell without fear of losing their connection.
-
-=cut
-
-=head1 INSTALLATION
-
-  To set the login shell for a user run:
-
-=for example start
-
-   usermod -s /usr/bin/xen-login-shell $USERNAME
-
-=for example end
-
-  You will also need to ensure that the given username has a Xen instance
- named after their user account, and that sudo has been setup appropriately.
-
-=cut
-
-
-=head1 AUTHOR
-
- Steve
- --
- http://www.steve.org.uk/
-
- $Id: xen-login-shell,v 1.6 2006-12-07 14:47:24 steve Exp $
-
-=cut
-
-
-=head1 LICENSE
-
-Copyright (c) 2005-2006 by Steve Kemp.  All rights reserved.
-
-This module is free software;
-you can redistribute it and/or modify it under
-the same terms as Perl itself.
-The LICENSE file contains the full text of the license.
-
-=cut
 

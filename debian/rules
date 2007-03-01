@@ -38,7 +38,7 @@ install: build
 
 # make the manpages
 	mkdir -p `pwd`/debian/xen-shell/usr/share/man/man1/
-	for i in bin/*-*; do file=`basename $$i`; pod2man $$i `pwd`/debian/xen-shell/usr/share/man/man1/$$file.1; done
+	for i in man/*.man; do file=`basename $$i .man` ; cp $$i `pwd`/debian/xen-shell/usr/share/man/man1/$$file.1; done
 	for i in `pwd`/debian/xen-shell/usr/share/man/man1/*.1; do gzip -f -9 $$i; done
 
 # the xen-add-user isn't supposed to be installed so we delete that one.
