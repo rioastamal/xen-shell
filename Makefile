@@ -48,7 +48,7 @@ install: manpages
 
 
 manpages:
-	for i in bin/*-*; do file=`basename $$i`; pod2man $$i /usr/share/man/man1/$$file.1; done
+	for i in man/*.man; do file=`basename $$i .man` ; cp $$i /usr/share/man/man1/$$file.1; done
 	for i in /usr/share/man/man1/*.1; do gzip -f -9 $$i; done
 	rm /usr/share/man/man1/xen-add-user.1.gz
 
