@@ -129,4 +129,62 @@
 .\" ========================================================================
 .\"
 .IX Title "XEN-LOGIN-SHELL 1"
-.TH XEN-LOGIN-SHELL 1 "2007-03-01" "perl v5.8.8" "User Contributed Perl Documentation"
+.TH XEN-LOGIN-SHELL 1 "2007-02-24" "perl v5.8.8" "User Contributed Perl Documentation"
+.SH "NAME"
+xen\-login\-shell \- A login shell to allow a user to control a Xen guest.
+.SH "SYNOPSIS"
+.IX Header "SYNOPSIS"
+.Vb 1
+\&  xen\-login\-shell
+.Ve
+.PP
+.Vb 1
+\&  This script accepts no command line arguments, or flags.
+.Ve
+.SH "DESCRIPTION"
+.IX Header "DESCRIPTION"
+.Vb 4
+\&  xen\-login\-shell is designed to be a simple wrapper around the xen\-shell
+\& program.  This script should be set as the login\-shell for any user who
+\& is supposed to control a single Xen instance which is named after their
+\& login name.
+.Ve
+.PP
+.Vb 3
+\&  The reason this script is set as the login shell is so that GNU Screen
+\& can be invoked to allow users to disconnect/reconnect to the real
+\& shell without fear of losing their connection.
+.Ve
+.SH "INSTALLATION"
+.IX Header "INSTALLATION"
+.Vb 1
+\&  To set the login shell for a user run:
+.Ve
+.PP
+.Vb 1
+\&   usermod \-s /usr/bin/xen\-login\-shell $USERNAME
+.Ve
+.PP
+.Vb 2
+\&  You will also need to ensure that the given username has a Xen instance
+\& named after their user account, and that sudo has been setup appropriately.
+.Ve
+.SH "AUTHOR"
+.IX Header "AUTHOR"
+.Vb 3
+\& Steve
+\& \-\-
+\& http://www.steve.org.uk/
+.Ve
+.PP
+.Vb 1
+\& $Id: xen-login-shell.man,v 1.2 2007-03-01 22:29:41 radu Exp $
+.Ve
+.SH "LICENSE"
+.IX Header "LICENSE"
+Copyright (c) 2005\-2006 by Steve Kemp.  All rights reserved.
+.PP
+This module is free software;
+you can redistribute it and/or modify it under
+the same terms as Perl itself.
+The \s-1LICENSE\s0 file contains the full text of the license.
