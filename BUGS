@@ -2,7 +2,12 @@
 Reporting Bugs
 --------------
 
-  To report a bug please use the xen-tools mailing list:
+  If you're using the Debian package of this shell then
+ please consider reporting your bug via the Debian bug
+ tracking system - this will allow all users to see it
+ and should speed fixing it.
+
+  Failing that you may use the xen-tools mailing list:
 
         http://xen-tools.org/software/xen-shell/lists.html
 
@@ -18,9 +23,6 @@ Known Bugs
 
         http://bugs.debian.org/xen-shell
 
-  If you're running the code on a Debian host system then reporting 
- bugs against the Debian package is a good thing to do; by doing so
- you allow others to view issues, and I check the bug-page regularly.
 
 Steve
 -- 

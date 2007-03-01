@@ -1,7 +1,8 @@
 Source: xen-shell
 Section: utils
 Priority: extra
-Maintainer: Steve Kemp <steve@steve.org.uk>
+Maintainer: Radu Spineanu <radu@debian.org>
+Uploaders: Steve Kemp <skx@debian.org>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.7.2
 
@@ -14,6 +15,6 @@ Description: Console based Xen administration utility
  to fully manage inidividual Xen guest instances.
  .
  The shell allows users to start, stop, reboot, or connect to the serial
- console of their Xen guest isntance.
+ console of a Xen guest instance upon a Xen system.
  .
  Homepage: http://xen-tools.org/software/xen-shell
