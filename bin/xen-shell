@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.77 2007-03-01 18:08:16 steve Exp $
+ $Id: xen-shell,v 1.78 2007-03-03 10:22:10 steve Exp $
 
 =cut
 
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.0';
-my $VERSION   = '$Revision: 1.77 $';
+my $VERSION   = '$Revision: 1.78 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -318,16 +318,20 @@ my $ACTIVE = '';
 
 
 
+
+#
+#  Parse any command line arguments which might be present.
+#
+#  Do this first so that --help, etc, works.
+#
+parseCommandLineArguments();
+
+
 #
 # Sanity check our host and user.
 #
 sanityCheck();
 
-
-#
-#  Parse any command line arguments which might be present.
-#
-parseCommandLineArguments();
 
 
 #
@@ -1575,7 +1579,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.77 2007-03-01 18:08:16 steve Exp $
+ $Id: xen-shell,v 1.78 2007-03-03 10:22:10 steve Exp $
 
 =cut
 
