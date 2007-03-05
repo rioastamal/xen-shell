@@ -124,6 +124,14 @@ XENUSERS     ALL      = NOPASSWD: XEN,XENIMG
   If you use the "reimage" system then you'll want to allow the users to
  execute "xen-create-image" if you use that too.
 
+  Alternatively you could use something like this:
+
+# /etc/sudoers
+steve ALL = NOPASSWD: /usr/sbin/xm, /usr/bin/xen-create-image
+bob   ALL = NOPASSWD: /usr/sbin/xm, /usr/bin/xen-create-image
+
+
+
 
 Specifying Hosts
 ----------------
