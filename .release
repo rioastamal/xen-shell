@@ -3,6 +3,11 @@
 #
 
 #
+#  preupload
+#
+preupload="make release"
+
+#
 #
 #  Pattern for our release tarball.
 #
