@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.80 2007-03-14 21:14:33 steve Exp $
+ $Id: xen-shell,v 1.81 2007-05-02 12:01:06 steve Exp $
 
 =cut
 
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.1';
-my $VERSION   = '$Revision: 1.80 $';
+my $VERSION   = '$Revision: 1.81 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -231,6 +231,12 @@ my %dispatch =
        help => "Change your login password.",
        info => "Change the password used to access this host.",
      },
+   "pause" =>
+     {
+        sub => \&do_pause,
+       help => "Pause your instance.",
+       info => "This will pause the Xen guest.",
+     },
    "quit" =>   # Dupe: exit
      {
         sub => \&do_exit,
@@ -279,6 +285,12 @@ my %dispatch =
         sub => \&do_top,
        help => "Show the list of running instances, their CPU usage, etc.",
        info => "Show system resource usage.",
+     },
+   "unpause" =>
+     {
+        sub => \&do_unpause,
+       help => "Unpause your instance.",
+       info => "This will unpause the Xen guest and start it running if it was paused.",
      },
    "uptime" =>
      {
@@ -1163,6 +1175,27 @@ sub do_password
 
 
 
+=begin doc
+
+  This will pause the Xen guest.
+
+=cut
+
+sub do_pause
+{
+    #
+    #  Make sure the user has selected an instance
+    # they can control.
+    #
+    return if ( ! isControlling() );
+
+    print "Pausing instance: $ACTIVE\n";
+
+    system( "sudo xm pause $ACTIVE" );
+
+}
+
+
 
 =begin doc
 
@@ -1461,6 +1494,26 @@ sub do_top
 
 
 
+=begin doc
+
+  This will unpause the Xen guest.
+
+=cut
+
+sub do_unpause
+{
+    #
+    #  Make sure the user has selected an instance
+    # they can control.
+    #
+    return if ( ! isControlling() );
+
+    print "Un-pausing instance: $ACTIVE\n";
+
+    system( "sudo xm unpause $ACTIVE" );
+}
+
+
 
 =begin doc
 
@@ -1579,7 +1632,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.80 2007-03-14 21:14:33 steve Exp $
+ $Id: xen-shell,v 1.81 2007-05-02 12:01:06 steve Exp $
 
 =cut
 
