@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.81 2007-05-02 12:01:06 steve Exp $
+ $Id: xen-shell,v 1.82 2007-05-02 15:04:15 steve Exp $
 
 =cut
 
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.1';
-my $VERSION   = '$Revision: 1.81 $';
+my $VERSION   = '$Revision: 1.82 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -289,8 +289,8 @@ my %dispatch =
    "unpause" =>
      {
         sub => \&do_unpause,
-       help => "Unpause your instance.",
-       info => "This will unpause the Xen guest and start it running if it was paused.",
+       help => "Unpause your instance, and start it running again.",
+       info => "This will unpause the Xen guest.",
      },
    "uptime" =>
      {
@@ -1632,7 +1632,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.81 2007-05-02 12:01:06 steve Exp $
+ $Id: xen-shell,v 1.82 2007-05-02 15:04:15 steve Exp $
 
 =cut
 
