@@ -1,3 +1,10 @@
+xen-shell (1.2-1) stable; urgency=low
+
+  * New upstream release:
+    - Two new commands were added: "pause" & "unpause".
+
+ -- Steve Kemp <steve@steve.org.uk>  Fri, 11 May 2007 17:26:19 +0000
+
 xen-shell (0.9-1) stable; urgency=low
 
   * New upstream release:

@@ -22,14 +22,13 @@ xen-shell
 
   The shell allows:
 
-  * Shutdown.
-  * Bootup.
-  * Reboot.
   * Console access.
+  * Bootup & Shutdown.
+  * Pause & Unpause.
   * Reimaging.
 
-  This shell supports integrated help, along with command history,
- and command completion.
+  The shell contains integrated help, command completion and a 
+ persistent command history.
 
 
 
