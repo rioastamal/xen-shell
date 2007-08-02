@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.83 2007-05-11 16:26:29 steve Exp $
+ $Id: xen-shell,v 1.84 2007-08-02 17:42:01 steve Exp $
 
 =cut
 
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.2';
-my $VERSION   = '$Revision: 1.83 $';
+my $VERSION   = '$Revision: 1.84 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -188,6 +188,12 @@ if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 #
 my %dispatch =
   (
+   "bandwidth" =>
+     {
+        sub => \&do_bandwidth,
+       help => "Show your bandwidth usage.",
+       info => "Show your bandwidth usage.",
+     },
    "boot" =>
      {
         sub => \&do_boot,
@@ -678,6 +684,7 @@ EOF
 
   This means:
 
+    - We remove "vnstat" if there is no bandwidth accounting.
     - We remove "rdns" if ~/ips.txt is missing or non-writable.
     - We remove "reimage" if ~/image.sh isn't present and executable.
     - We remove "passwd" if ~/.ssh/authorized_keys is present and non-empty.
@@ -689,6 +696,15 @@ EOF
 
 sub removeCommands
 {
+    #
+    #  Bandwidth
+    #
+    if ( ! -e "/var/lib/vnstat/$USER" )
+    {
+        $dispatch{ 'bandwidth' } = undef;
+        delete( $dispatch{ 'bandwidth' } );
+    }
+
     #
     #  reimage
     #
@@ -951,6 +967,26 @@ sub getPrompt
 #
 ##
 
+
+
+=begin doc
+
+  Show your bandwidth usage.
+
+=end doc
+
+=cut
+
+sub do_bandwidth
+{
+    #
+    #  Make sure the user has selected an instance
+    # they can control.
+    #
+    return if ( ! isControlling() );
+
+    system( "vnstat -i $ACTIVE --months" );
+}
 
 
 
@@ -1632,7 +1668,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.83 2007-05-11 16:26:29 steve Exp $
+ $Id: xen-shell,v 1.84 2007-08-02 17:42:01 steve Exp $
 
 =cut
 
