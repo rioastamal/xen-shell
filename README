@@ -26,6 +26,8 @@ xen-shell
   * Bootup & Shutdown.
   * Pause & Unpause.
   * Reimaging.
+  * DNS control.
+  * Bandwidth viewing.
 
   The shell contains integrated help, command completion and a 
  persistent command history.
@@ -98,6 +100,34 @@ Reimaging
  can allow your users to install Sarge, CentOS, or Gentoo.
 
   For more details see "xen-shell --manual".
+
+
+
+Bandwidth Viewing
+-----------------
+
+  The shell supports the display of bandwidth used by a Xen guest
+ providing you have :
+
+   1.  The vnstat package installed.
+
+   2.  The primary network interface for each guest named after
+      the name of the guest.
+
+  For example if you have the guest named 'skx' then inside the
+ Xen configuration file you should have something like this:
+
+
+   vif = [ 'vifname=skx, ip=192.168.1.100, mac=00:17:31:56:BC:2D' ]
+
+  This will ensure that once the guest is started you can run:
+
+root@vain:~# ifconfig skx
+skx       Link encap:Ethernet  HWaddr 00:17:31:56:BC:2D
+          inet addr:192.168.1.30  Bcast:192.168.1.255  Mask:255.255.255.255
+..
+
+
 
 
 Installation
