@@ -9,7 +9,7 @@ Standards-Version: 3.7.2
 Package: xen-shell
 Architecture: all
 Depends: perl-modules, libterm-readline-gnu-perl, screen, sudo
-Recommends: xen-tools
+Recommends: xen-tools, vnstat
 Description: Console based Xen administration utility
  Using the xen-shell a hosting company could easily allow their customers
  to fully manage individual Xen guest instances.
