@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.84 2007-08-02 17:42:01 steve Exp $
+ $Id: xen-shell,v 1.85 2007-08-03 22:52:52 steve Exp $
 
 =cut
 
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.2';
-my $VERSION   = '$Revision: 1.84 $';
+my $VERSION   = '$Revision: 1.85 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -191,6 +191,7 @@ my %dispatch =
    "bandwidth" =>
      {
         sub => \&do_bandwidth,
+       args => "[hourly|daily|weekly|monthly]",
        help => "Show your bandwidth usage.",
        info => "Show your bandwidth usage.",
      },
@@ -979,13 +980,32 @@ sub getPrompt
 
 sub do_bandwidth
 {
+    # optional reporting period
+    my( $period ) = ( @_ );
+
+    my $arg = "--months";
+
+    #
+    #  See if we got a match
+    #
+    if ( defined( $period ) )
+    {
+        $arg = "--hours"  if ( lc($period) eq "hourly" );
+        $arg = "--days"   if ( lc($period) eq "daily" );
+        $arg = "--weeks"  if ( lc($period) eq "weekly" );
+        $arg = "--months" if ( lc($period) eq "monthly" );
+    }
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
     return if ( ! isControlling() );
 
-    system( "vnstat -i $ACTIVE --months" );
+    #
+    #  Now show the output
+    #
+    system( "vnstat -i $ACTIVE $arg\n" );
 }
 
 
@@ -1668,7 +1688,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.84 2007-08-02 17:42:01 steve Exp $
+ $Id: xen-shell,v 1.85 2007-08-03 22:52:52 steve Exp $
 
 =cut
 
