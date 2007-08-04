@@ -141,7 +141,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.86 2007-08-03 22:56:27 steve Exp $
+ $Id: xen-shell,v 1.87 2007-08-04 21:12:59 steve Exp $
 
 =cut
 
@@ -172,7 +172,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.3';
-my $VERSION   = '$Revision: 1.86 $';
+my $VERSION   = '$Revision: 1.87 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -549,8 +549,9 @@ sub findInstancesFor
         my @contents = <CFG>;
         close( CFG);
 
-        # the name of this instance.
-        my $name = '';
+        # the name of this instance, and any admin users we've found.
+        my $name   = '';
+        my $admins = '';
 
         # process each line.
         foreach my $line ( @contents )
@@ -563,11 +564,6 @@ sub findInstancesFor
             if ( $line =~ /^[ \t]*name[ \t]*=[ \t]*['"]*([^'"]+)['"]*[ \t]*$/i )
             {
                 $name = $1;
-                # found the right one?
-                if ( lc( $name ) eq ( lc( $username ) ) )
-                {
-                    push( @results, $name );
-                }
             }
 
 
@@ -575,22 +571,32 @@ sub findInstancesFor
             if ( $line =~ /^[ \t]*xen_shell[ \t]*=[ \t]*['"]*([^'"]+)['"]*[ \t]*$/i )
             {
                 # We've got a list of names.
-                my $controllers = $1;
+                $admins = $1;
+            }
+        }
 
-                # split by ",".
-                foreach my $potential ( split( /,/, $controllers ) )
-                {
-                    # trim leading and trailing whitespace.
-                    $potential =~ s/^\s+//;
-                    $potential =~ s/\s+$//;
+        #
+        #  Did we find a name matching the current login?
+        #
+        if ( lc( $name ) eq ( lc( $username ) ) )
+        {
+            push( @results, $name );
+        }
 
-                    # does it match?
-                    if ( ( lc( $potential ) eq ( lc( $username ) ) ) &&
-                         ( length( $username ) ) )
-                    {
-                        push @results, $name;
-                    }
-                }
+        #
+        # Did we find an admin user matching our current login.
+        #
+        foreach my $potential ( split( /,/, $admins ) )
+        {
+            # trim leading and trailing whitespace.
+            $potential =~ s/^\s+//;
+            $potential =~ s/\s+$//;
+
+            # does it match?
+            if ( ( lc( $potential ) eq ( lc( $username ) ) ) &&
+                 ( length( $username ) ) )
+            {
+                push @results, $name;
             }
         }
     }
@@ -1688,7 +1694,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.86 2007-08-03 22:56:27 steve Exp $
+ $Id: xen-shell,v 1.87 2007-08-04 21:12:59 steve Exp $
 
 =cut
 
