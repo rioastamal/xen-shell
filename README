@@ -10,134 +10,33 @@ CVS Repository:
 xen-shell
 ---------
 
-  This package contains a simple script called 'xen-login-shell' which is
- designed to be a login shell for a user on a Xen host.
+  The xen-shell is a simple program which is designed to be the login
+ shell for a user of a Xen-based hosting account.
 
-  This new login shell runs 'xen-shell', which is the real shell, under
- GNU screen.  This allows people to work on their system safely even
- in the case of disconnections.
+  For a hosting company who wishes to reduce support they may install
+ and configure this shell for each of their users - reducing the amount
+ of technical support which is required.
 
-  There are several commands available within this shell which will
- allow the user to control their Xen guest instance.
+  Users of the shell may:
 
-  The shell allows:
+  * Access the serial console of their guest(s).
+  * Bootup & Shutdown their guest(s).
+  * Reimage their guests(s) to a new distribution..
+  * Control their own reverse DNS entries.
+  * View the bandwidth used by their guest(s).
 
-  * Console access.
-  * Bootup & Shutdown.
-  * Pause & Unpause.
-  * Reimaging.
-  * DNS control.
-  * Bandwidth viewing.
-
-  The shell contains integrated help, command completion and a 
- persistent command history.
-
-
-
-Support
--------
-
-  This software is released either under the terms of the GNU General Public
- License (v1 or v2) or the Perl artistic license, at your choice.
-
-  This allows you to use it commercially with no charge - however commercial
- users are encouraged to make a donation if they're generating a profit:
-
-    http://steve.org.uk/donate/
-
-  Bug reports/suggestions can be sent to the author.
-
-
-
-Notes
------
-
-  We setup the shell environment of GNU Screen to be the xen-shell
- script, and attempt to limit the full abilities so that users cannot
- break out into general host access.
-
-  GNU Screen has several abilities to "break out", I've disabled all
- the ones I can spot via the _screenrc file which is installed into
- /etc/xen-shell.
-
-  There may be holes I'm currently unaware of, and if you spot one I'd
- appreciate learning of it.
-
-
-
-Reverse DNS
------------
-
-  Whilst the shell doesn't perform any forward/reverse DNS changes by
- itself it does have integrated support for carrying out such actions.
-
-  The shell reads ~/ips.txt for the user if it exists and enables the
- reverse DNS support.  If that file isn't present the rdns command is
- disabled.
-
-  When the user makes any changes using the rdns command it is only the
- ips.txt file which is updated - you are expected to write a cronjob to
- notice these changes and perform the real DNS updates.
-
-  For more details see "xen-shell --manual".
-
-
-
-Reimaging
----------
-
-  The shell supports the ability to allow users to reimage their system,
- or reset it to a pristine state.  This ability isn't in the shell per se,
- instead the script will invoke:
-
-        /home/$USER/image.sh
-
-  The shell will prompt for confirmation before executing the script, and
- countdown to allow the user to change their mind.
-
-  To add support you are expected to write a short shell script to 
- untar/install/fix their installation.  Using the xen-tools package you
- can allow your users to install Sarge, CentOS, or Gentoo.
-
-  For more details see "xen-shell --manual".
-
-
-
-Bandwidth Viewing
------------------
-
-  The shell supports the display of bandwidth used by a Xen guest
- providing you have :
-
-   1.  The vnstat package installed.
-
-   2.  The primary network interface for each guest named after
-      the name of the guest.
-
-  For example if you have the guest named 'skx' then inside the
- Xen configuration file you should have something like this:
-
-
-   vif = [ 'vifname=skx, ip=192.168.1.100, mac=00:17:31:56:BC:2D' ]
-
-  This will ensure that once the guest is started you can run:
-
-root@vain:~# ifconfig skx
-skx       Link encap:Ethernet  HWaddr 00:17:31:56:BC:2D
-          inet addr:192.168.1.30  Bcast:192.168.1.255  Mask:255.255.255.255
-..
-
+  Full help is available, and command completion is in place for the
+ basic primitives (although not the optional arguments).
 
 
 
 Installation
 ------------
 
-  "make install" when executed as root will install this software upon
- your system.
+  To install the software run "make install" as root.
 
-  Once installed set each user who you wish to control a Xen instance
- to have their login shell be: /usr/bin/xen-login-shell.
+  Once installed set the login shell for each user you wish to use the
+ shell to be: /usr/bin/xen-login-shell
 
   You'll need to ensure that these users can run "xm" as root with
  no password, via sudo:
@@ -167,7 +66,7 @@ Specifying Hosts
 
   The xen shell allows a user to control multiple Xen guests.  To specify
  which host a user can control you should ensure that your xen configuration
- files, beneath /etc/xen, contain the following:
+ files, (located within the directory /etc/xen), contain the following:
 
    name      = 'my.host.name'
    xen_shell = 'bob, steve, skx'
@@ -178,6 +77,98 @@ Specifying Hosts
 
   If a user is allowed to control multiple hosts then the "control" and
  "list" commands will be enabled for them.
+
+
+
+Support
+-------
+
+  This software is released either under the terms of the GNU General Public
+ License (v1 or v2) or the Perl artistic license, at your choice.
+
+  This allows you to use it commercially with no charge - however commercial
+ users are encouraged to make a donation if they're generating a profit:
+
+    http://steve.org.uk/donate/
+
+  Bug reports/suggestions can be sent to the author.
+
+
+
+Optional Features
+-----------------
+
+  The shell contains several "optional" features which may be disabled,
+ or which may not work depending upon your environtment.  These are:
+
+   1.  Reverse DNS support.
+   2.  Reimaging support.
+   3.  Bandwidth display
+
+  Each of these things requires the support of external tools, and
+ configuration.   If the shell detects that this support is not enabled
+ at startup those commands will be disabled.
+
+
+1. Reverse DNS Support [Optional]
+---------------------------------
+
+  Whilst the shell doesn't perform any forward/reverse DNS changes by
+ itself it does have a user-interface for working with reverse DNS.
+
+  If the file ~/ips.txt exists when a user starts the shell the support
+ is enabled, otherwise it is disabled.
+
+  When the user users the 'rdns' command the only thing that changes
+ is the contents of this text file.
+
+  You are expected to process the result of these files yourself to
+ actually update DNS.
+
+
+
+2. Reimaging Support  [Optional]
+--------------------------------
+
+  The shell supports the ability to allow users to reimage their system,
+ or reset it to a pristine state.  This ability isn't in the shell per se,
+ instead the script will invoke:
+
+        /home/$USER/image.sh
+
+  The shell will prompt for confirmation before executing that script, and
+ countdown to allow the user to change their mind.
+
+  To enable reimaging you are expected to write a short shell script to 
+ untar/install/fix their installation.  Using the xen-tools package you
+ can allow your users to install Sarge, CentOS, or Gentoo.
+
+
+
+3. Bandwidth Viewing [Optional]
+-------------------------------
+
+  The shell supports the display of bandwidth used by a Xen guest
+ providing you have :
+
+   1.  The vnstat package installed.
+
+   2.  The primary network interface for each guest named after
+      the name of the guest.
+
+  For example if you have the guest named 'skx' then inside the
+ Xen configuration file you should have something like this:
+
+
+   vif = [ 'vifname=skx, ip=192.168.1.100, mac=00:17:31:56:BC:2D' ]
+
+  This will ensure that once the guest is started you can run:
+
+root@vain:~# ifconfig skx
+skx       Link encap:Ethernet  HWaddr 00:17:31:56:BC:2D
+          inet addr:192.168.1.30  Bcast:192.168.1.255  Mask:255.255.255.255
+..
+
 
 
 
