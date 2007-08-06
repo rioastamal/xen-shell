@@ -165,7 +165,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.90 2007-08-06 20:52:17 steve Exp $
+ $Id: xen-shell,v 1.91 2007-08-06 21:39:00 steve Exp $
 
 =cut
 
@@ -196,7 +196,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.3';
-my $VERSION   = '$Revision: 1.90 $';
+my $VERSION   = '$Revision: 1.91 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -1577,7 +1577,40 @@ sub do_rdns
         }
         close( NEW );
         print "Set the reverse DNS for $ip to $host\n";
-        print "Please wait an hour or two for it to take effect\n";
+
+        #
+        #  If we have a post-update command then we'll execute it.
+        #
+        if ( defined( $CONFIG{'updatedns'} ) &&
+             length( $CONFIG{'updatedns'} ) )
+        {
+            #
+            #  The command we'll run.
+            #
+            my $cmd = $CONFIG{'updatedns'};
+
+            #
+            #  Does this need a file to be inserted into the command line?
+            #
+            if ( $cmd =~ /\$FILE/ )
+            {
+                $cmd =~ s/\$FILE/\/home\/$USER\/ips.txt/g;
+            }
+
+            #
+            #  Run the potentially modified command.
+            #
+            system( $cmd );
+        }
+        else
+        {
+            #
+            #  No command - we assume cron-fu will update the entries,
+            # so we should tell the user to expect a wait.
+            #
+            print "Please wait an hour or two for it to take effect\n";
+
+        }
     }
     else
     {
@@ -1846,7 +1879,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.90 2007-08-06 20:52:17 steve Exp $
+ $Id: xen-shell,v 1.91 2007-08-06 21:39:00 steve Exp $
 
 =cut
 
