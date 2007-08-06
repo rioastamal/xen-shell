@@ -37,7 +37,7 @@ xen-shell - Provide a console interface to control Xen guests.
 =item The ability to run within GNU Screen to allow long-running jobs to be completed "offline".
 
 =back
- 
+
 
 =cut
 
@@ -165,7 +165,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.89 2007-08-05 15:03:07 steve Exp $
+ $Id: xen-shell,v 1.90 2007-08-06 20:52:17 steve Exp $
 
 =cut
 
@@ -196,8 +196,20 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.3';
-my $VERSION   = '$Revision: 1.89 $';
+my $VERSION   = '$Revision: 1.90 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
+
+
+#
+#  Holder for values read from the configuration file.
+#
+my %CONFIG;
+
+#
+#  Defaults
+#
+$CONFIG{'pattern'} = '/etc/xen/*';
+$CONFIG{'config'}  = '/etc/xen-shell/xen-shell.conf';
 
 
 
@@ -359,15 +371,19 @@ my $ACTIVE = '';
 
 
 
-
-
-
 #
 #  Parse any command line arguments which might be present.
 #
 #  Do this first so that --help, etc, works.
 #
 parseCommandLineArguments();
+
+
+#
+#  Parse our configuration file, if it exists.
+#
+parseConfigurationFile( $CONFIG{'config'} ) if ( -e $CONFIG{'config'} );
+
 
 
 #
@@ -448,8 +464,15 @@ sub parseCommandLineArguments
 
     if ( $SHOW_VERSION )
     {
-       print "xen-shell v$RELEASE.$VERSION\n";
-       exit;
+        if ( $CONFIG{'banner'} )
+        {
+            print $CONFIG{'banner'} . "\n";
+        }
+        else
+        {
+            print "xen-shell v$RELEASE.$VERSION\n";
+        }
+        exit;
     }
 
     #
@@ -460,6 +483,62 @@ sub parseCommandLineArguments
     {
         $ACTIVE = $INITIAL_ACTIVE if ( canControl( $INITIAL_ACTIVE ) );
     }
+}
+
+
+
+=begin doc
+
+  Parse our configuration file.
+
+=end doc
+
+=cut
+
+sub parseConfigurationFile
+{
+    my( $file ) = (@_);
+
+    #
+    #  Make sure the file is specified + exists.
+    #
+    return if ( ! -e $file );
+
+    open( FILE, "<", $file ) or die "Cannot read file '$file' - $!";
+    while (defined(my $line = <FILE>) )
+    {
+        chomp $line;
+
+        # Skip lines beginning with comments
+        next if ( $line =~ /^([ \t]*)\#/ );
+
+        # Skip blank lines
+        next if ( length( $line ) < 1 );
+
+        # Strip trailing comments.
+        if ( $line =~ /(.*)\#(.*)/ )
+        {
+            $line = $1;
+        }
+
+        # Find variable settings
+        if ( $line =~ /([^=]+)=([^\n]+)/ )
+        {
+            my $key = $1;
+            my $val = $2;
+
+            # Strip leading and trailing whitespace.
+            $key =~ s/^\s+//;
+            $key =~ s/\s+$//;
+            $val =~ s/^\s+//;
+            $val =~ s/\s+$//;
+
+            # Store value.
+            $CONFIG{ $key } = $val;
+        }
+    }
+
+    close( FILE );
 }
 
 
@@ -513,8 +592,8 @@ sub sanityCheck
     #
     #  Test that the user has a Xen guest present upon this host.
     #
-    #  We parse each file beneath /etc/xen and look for suitable
-    # instances.
+    #  We parse each file beneath the Xen configuration directory and
+    # look for suitable instances.
     #
     #
     @INSTANCES = findInstancesFor( $USER );
@@ -546,10 +625,9 @@ sub sanityCheck
 
   There are two ways that a user may control an instance:
 
-   1.  By having "name = '$LOGIN'" inside the xen configuration file.
+   1.  By having "name = '$LOGIN'" inside the configuration file.
 
-   2.  By having "xen_shell = '$LOGIN,$LOGIN2'" inside the xen configuration
-      file.
+   2.  By having "xen_shell = '$LOGIN,$LOGIN2'" inside the configuration file.
 
 =end doc
 
@@ -562,11 +640,17 @@ sub findInstancesFor
     # The results.
     my @results;
 
+    # Count of processed files.
+    my $count = 0;
+
     # Process all files.
-    foreach my $file ( sort( glob( "/etc/xen/*" ) ) )
+    foreach my $file ( sort( glob( $CONFIG{'pattern'} ) ) )
     {
         # skip non-files.
-        next if ( ! -f $file );
+        next if ( -d $file );
+
+        # count the match
+        $count += 1;
 
         # open and read the file.
         open( CFG, "<", $file ) or die "Failed to open $file - $!";
@@ -626,6 +710,23 @@ sub findInstancesFor
     }
 
     #
+    #  Sanity test.
+    #
+    if ( $count < 1 )
+    {
+        print <<EOF;
+
+  There were no Xen configuration files found which matched the pattern:
+
+   $CONFIG{'pattern'}
+
+  Please update /etc/xen-shell/xen-shell.conf
+
+EOF
+        exit;
+    }
+
+    #
     #  Only return unique results to handle foo.cfg + foo.cfg~
     #
     my %seen;
@@ -680,8 +781,8 @@ sub isControlling
     {
         print <<EOF;
 
-  You have no selected a Xen instance to control, and this command
- applies to only one instance rather than all of them.
+  You have not selected a Xen instance to control, and this command
+ is an instance-specific one.
 
   You may use the following two commands:
 
@@ -791,7 +892,14 @@ sub removeCommands
 
 sub showBanner
 {
-    print "xen-shell v$RELEASE.$VERSION - type 'help' for help.\n";
+    if ( $CONFIG{'banner'} )
+    {
+        print $CONFIG{'banner'} . "\n";
+    }
+    else
+    {
+        print "xen-shell v$RELEASE.$VERSION - type 'help' for help.\n";
+    }
 }
 
 
@@ -1203,7 +1311,14 @@ sub do_help
     #
     #  Header
     #
-    print "xen-shell v$RELEASE.$VERSION\n\n";
+    if ( $CONFIG{'banner'} )
+    {
+        print $CONFIG{'banner'} . "\n";
+    }
+    else
+    {
+        print "xen-shell v$RELEASE.$VERSION\n";
+    }
     print "The following commands are available within this shell:\n\n";
 
     #
@@ -1692,7 +1807,15 @@ sub do_version
         }
     }
     close( INFO );
-    print "xen-shell $RELEASE.$VERSION";
+
+    if ( $CONFIG{'banner'} )
+    {
+        print $CONFIG{'banner'} . "\n";
+    }
+    else
+    {
+        print "xen-shell v$RELEASE.$VERSION";
+    }
     if ( length( $xen ) )
     {
         print " running on Xen version $xen";
@@ -1723,7 +1846,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.89 2007-08-05 15:03:07 steve Exp $
+ $Id: xen-shell,v 1.90 2007-08-06 20:52:17 steve Exp $
 
 =cut
 
