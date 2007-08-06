@@ -39,6 +39,7 @@ install: manpages
 	cp bin/xen-shell /usr/bin
 	if [ ! -d /etc/xen-shell ]; then mkdir /etc/xen-shell ; fi
 	cp misc/_screenrc /etc/xen-shell
+	cp misc/xen-shell.conf /etc/xen-shell
 	if [ ! -d /etc/bash_completion.d ]; then mkdir /etc/bash_completion.d/ ; fi
 	cp misc/xen-shell /etc/bash_completion.d
 	@if [ -e /usr/local/bin/xm-reimage ]; then chmod -x /usr/local/bin/xm-reimage; echo "Obsolete software in /usr/local/bin/xm-reimage - please remove"; fi
