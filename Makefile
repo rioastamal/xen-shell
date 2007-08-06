@@ -77,6 +77,7 @@ remove:
 	rm /usr/bin/xen-login-shell
 	rm /usr/bin/xm-reimage
 	rm /etc/xen-shell/_screenrc
+	rm /etc/xen-shell/xen-shell.conf
 	-rmdir /etc/xen-shell
 
 
