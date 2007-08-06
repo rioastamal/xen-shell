@@ -32,6 +32,7 @@ install: build
 	mkdir -p `pwd`/debian/xen-shell/usr/share/man/man1
 
 	cp misc/_screenrc      `pwd`/debian/xen-shell/etc/xen-shell
+	cp misc/xen-shell.conf `pwd`/debian/xen-shell/etc/xen-shell
 	cp bin/xen-login-shell `pwd`/debian/xen-shell/usr/bin
 	cp bin/xen-shell       `pwd`/debian/xen-shell/usr/bin
 	cp bin/xm-reimage      `pwd`/debian/xen-shell/usr/bin
