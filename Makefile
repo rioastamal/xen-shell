@@ -48,7 +48,13 @@ install: manpages
 	@if ( grep /usr/local/bin/xen-login-shell /etc/passwd >/dev/null 2>/dev/null ) ; then echo "WARNING:  /etc/passwd contains users with their login shell pointing to the OLD software which was in /usr/local/bin" ; fi
 
 
-manpages:
+
+makemanpages: clean
+	cd bin; for i in *-*; do pod2man --release=${VERSION} --official --section=8 $$i ../man/$$i.man; done
+
+
+
+manpages: makemanpages
 	for i in man/*.man; do file=`basename $$i .man` ; cp $$i /usr/share/man/man1/$$file.1; done
 	for i in /usr/share/man/man1/*.1; do gzip -f -9 $$i; done
 	rm /usr/share/man/man1/xen-add-user.1.gz
