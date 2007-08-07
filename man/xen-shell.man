@@ -128,8 +128,8 @@
 .rm #[ #] #H #V #F C
 .\" ========================================================================
 .\"
-.IX Title "XEN-SHELL 1"
-.TH XEN-SHELL 1 "2007-03-01" "perl v5.8.8" "User Contributed Perl Documentation"
+.IX Title "XEN-SHELL 8"
+.TH XEN-SHELL 8 "2007-08-07" "1.3" "Perl Programmers Reference Guide"
 .SH "NAME"
 xen\-shell \- Provide a console interface to control Xen guests.
 .SH "SYNOPSIS"
@@ -143,7 +143,7 @@ xen\-shell \- Provide a console interface to control Xen guests.
 .Ve
 .PP
 .Vb 4
-\&   \-\-control=   Specify which instance to control by default.
+\&   \-\-control    Specify which instance to control by default.
 \&   \-\-help       Show brief help intstructions.
 \&   \-\-manual     Show more complete help.
 \&   \-\-version    Show the version of the software.
@@ -200,6 +200,54 @@ xen\-shell \- Provide a console interface to control Xen guests.
 \&  If a user is allowed to control more than one Xen guest upon the
 \& current host then the two commands "control" and "list" will be made
 \& available to them.
+.Ve
+.SH "COMMAND BLACKLISTING"
+.IX Header "COMMAND BLACKLISTING"
+.Vb 2
+\&  There are times when you might want to setup this shell such that
+\& some commands are not available.
+.Ve
+.PP
+.Vb 2
+\&  For the optional commands this is straightfoward; simply do not
+\& configure anything they rely upon.
+.Ve
+.PP
+.Vb 2
+\&  For the built\-in commands such as "version", "uptime", etc, you will
+\& need to use the built in blacklist support.
+.Ve
+.PP
+.Vb 1
+\&  There are two ways you can disable commands within the shell:
+.Ve
+.IP "Use /etc/xen\-shell/xen\-shell.conf" 8
+.IX Item "Use /etc/xen-shell/xen-shell.conf"
+.PD 0
+.IP "Use a per-domain blacklist" 8
+.IX Item "Use a per-domain blacklist"
+.PD
+.PP
+.Vb 2
+\&  To disable a command globally, amongst all Xen guests upon a host,
+\& you can simply add the following to xen\-shell.conf:
+.Ve
+.PP
+.Vb 4
+\&  #
+\&  #  Do not allow the following two commands
+\&  #
+\&  blacklist = version, uptime
+.Ve
+.PP
+.Vb 3
+\&  If you wish to disable a command for just a single instance, or
+\& only a few machines, then edit the Xen configuration file(s) to include
+\& this:
+.Ve
+.PP
+.Vb 1
+\&  xen_shell_blacklist = 'version, uptime'
 .Ve
 .SH "REIMAGING SUPPORT"
 .IX Header "REIMAGING SUPPORT"
@@ -274,6 +322,33 @@ xen\-shell \- Provide a console interface to control Xen guests.
 \&  If the file doesn't exist, or isn't writable, then the command will
 \& be disabled.
 .Ve
+.Sh "\s-1BANDWIDTH\s0 \s-1TRACKING\s0"
+.IX Subsection "BANDWIDTH TRACKING"
+.Vb 4
+\&  If you've got the 'vnstat' tool installed upon your host and the
+\& primary network interface of your Xen guest is given the same name
+\& as that of the guest you may see the bandwidth used via the 'bandwidth'
+\& command.
+.Ve
+.PP
+.Vb 2
+\&  To change the name of your interface you can configure your
+\& Xen guest with something like this in the configuration file:
+.Ve
+.PP
+.Vb 1
+\&  vif = [ 'ip=192.168.1.100,vifname=skx' ]
+.Ve
+.PP
+.Vb 2
+\&  Now when you run "ifconfig \-a" upon the dom0 you'll see the guest
+\& has an interface named 'skx'.
+.Ve
+.PP
+.Vb 2
+\&  If the system cannot find a database for bandwidth tracking of
+\& a particular guest then the bandwidth command will be disabled.
+.Ve
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 .Vb 3
@@ -283,7 +358,7 @@ xen\-shell \- Provide a console interface to control Xen guests.
 .Ve
 .PP
 .Vb 1
-\& $Id: xen-shell.man,v 1.1 2007-03-01 15:36:30 steve Exp $
+\& $Id: xen-shell.man,v 1.2 2007-08-07 20:25:18 steve Exp $
 .Ve
 .SH "LICENSE"
 .IX Header "LICENSE"
@@ -302,7 +377,7 @@ The \s-1LICENSE\s0 file contains the full text of the license.
 .Ve
 .PP
 .Vb 1
-\& $Id: xen-shell.man,v 1.1 2007-03-01 15:36:30 steve Exp $
+\& $Id: xen-shell.man,v 1.2 2007-08-07 20:25:18 steve Exp $
 .Ve
 .SH "LICENSE"
 .IX Header "LICENSE"
