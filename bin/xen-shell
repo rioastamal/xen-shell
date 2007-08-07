@@ -13,7 +13,7 @@ xen-shell - Provide a console interface to control Xen guests.
 
   Options:
 
-   --control=   Specify which instance to control by default.
+   --control    Specify which instance to control by default.
    --help       Show brief help intstructions.
    --manual     Show more complete help.
    --version    Show the version of the software.
@@ -211,7 +211,7 @@ xen_shell_blacklist = 'version, uptime'
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.92 2007-08-07 20:03:19 steve Exp $
+ $Id: xen-shell,v 1.93 2007-08-07 20:05:13 steve Exp $
 
 =cut
 
@@ -242,7 +242,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.3';
-my $VERSION   = '$Revision: 1.92 $';
+my $VERSION   = '$Revision: 1.93 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -2035,7 +2035,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.92 2007-08-07 20:03:19 steve Exp $
+ $Id: xen-shell,v 1.93 2007-08-07 20:05:13 steve Exp $
 
 =cut
 
