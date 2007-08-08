@@ -109,6 +109,13 @@ Optional Features
  configuration.   If the shell detects that this support is not enabled
  at startup those commands will be disabled.
 
+  If you don't want these facilities to be available to your users
+ then you just need to not configure their optional features.
+
+  If there are commands which are present in the shell which you
+ wish to disable please see 'man xen-shell'.
+
+
 
 1. Reverse DNS Support [Optional]
 ---------------------------------
