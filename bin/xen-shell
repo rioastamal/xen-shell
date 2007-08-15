@@ -215,7 +215,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.95 2007-08-15 16:09:03 steve Exp $
+ $Id: xen-shell,v 1.96 2007-08-15 16:16:20 steve Exp $
 
 =cut
 
@@ -246,7 +246,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.4';
-my $VERSION   = '$Revision: 1.95 $';
+my $VERSION   = '$Revision: 1.96 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -382,6 +382,13 @@ my %dispatch =
         sub  => \&do_status,
         help => "Show whether the Xen guest is running or not.",
         info => "Show the status of the Xen guest.",
+     },
+   "sysreq" =>
+     {
+        sub  => \&do_sysreq,
+        args => "[string]",
+        help => "Send a 'sysreq' keystroke to the guest.",
+        info => "Send a 'sysreq' keystroke to the guest, this allows you to try to cleanly shutdown a hung instance.",
      },
    "top" =>
      {
@@ -1880,6 +1887,55 @@ sub do_status
 
 =begin doc
 
+  Send a single sysreq keystroke to the current instance.
+
+=end doc
+
+=cut
+
+sub do_sysreq
+{
+    my( $string ) = ( @_ );
+
+    #
+    #  Make sure the user has selected an instance
+    # they can control.
+    #
+    return if ( ! isControlling() );
+
+    #
+    #  Make sure we recieved a key.
+    #
+    if ( !defined( $string ) )
+    {
+        print <<EOF;
+Usage: sysreq [string]
+
+  Each character of the string will be sent as a sysreq key.
+EOF
+        return;
+    }
+
+    #
+    #  Split into letters.
+    #
+    foreach my $letter ( split( //, $string ) )
+    {
+        #
+        #  a-z + ? are the only valid keys we care about.
+        #
+        if ( $letter =~ /[a-z\?]/ )
+        {
+            print "Sending sysreq: $letter\n";
+            system( "sudo xm sysrq $ACTIVE $letter" );
+        }
+    }
+}
+
+
+
+=begin doc
+
   Show Xen top information.
 
 =end doc
@@ -2043,7 +2099,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.95 2007-08-15 16:09:03 steve Exp $
+ $Id: xen-shell,v 1.96 2007-08-15 16:16:20 steve Exp $
 
 =cut
 
