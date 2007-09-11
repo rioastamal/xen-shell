@@ -1,3 +1,12 @@
+xen-shell (1.6-1) unstable; urgency=low
+
+  * New upstream release:
+    - Fixes a bug in handling bandwidth tracking for people with
+      control of more than one domU.
+      (Closes: #440079)
+
+ -- Steve Kemp <skx@debian.org>  Tue, 11 Sep 2007 23:17:21 +0000
+
 xen-shell (1.5-1) unstable; urgency=low
 
   * New upstream release:
