@@ -215,7 +215,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.98 2007-08-17 12:39:35 steve Exp $
+ $Id: xen-shell,v 1.99 2007-09-11 22:26:23 steve Exp $
 
 =cut
 
@@ -246,7 +246,7 @@ use Pod::Usage;
 #  Version number of this script, taken from the CVS revision number.
 #
 my $RELEASE   = '1.5';
-my $VERSION   = '$Revision: 1.98 $';
+my $VERSION   = '$Revision: 1.99 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -950,9 +950,16 @@ EOF
 sub removeCommands
 {
     #
-    #  Bandwidth
+    #  Bandwidth:  Remove this command unless there is at least one
+    # instance which is setup correctly.
     #
-    if ( ! -e "/var/lib/vnstat/$USER" )
+    my $has_vnstat = 0;
+    foreach my $name ( @INSTANCES )
+    {
+        $has_vnstat = 1 if ( -e "/var/lib/vnstat/$name" );
+    }
+
+    if ( ! $has_vnstat )
     {
         $dispatch{ 'bandwidth' } = undef;
         delete( $dispatch{ 'bandwidth' } );
@@ -1307,9 +1314,17 @@ sub do_bandwidth
     return if ( ! isControlling() );
 
     #
-    #  Now show the output
+    #  A user might have N instances, of which only one might
+    # have vnstat setup.  Make sure this instance is setup.
     #
-    system( "vnstat -i $ACTIVE $arg\n" );
+    if ( -e "/var/lib/vnstat/$ACTIVE" )
+    {
+        system( "vnstat -i $ACTIVE $arg\n" );
+    }
+    else
+    {
+        print "Guest '$ACTIVE' is not configured for bandwidth display.\n";
+    }
 }
 
 
@@ -2176,7 +2191,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.98 2007-08-17 12:39:35 steve Exp $
+ $Id: xen-shell,v 1.99 2007-09-11 22:26:23 steve Exp $
 
 =cut
 
