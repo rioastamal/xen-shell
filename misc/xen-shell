@@ -14,7 +14,7 @@
 # --
 # http://www.steve.org.uk
 #
-# $Id: xen-shell,v 1.1 2007-01-01 22:59:12 steve Exp $
+# $Id: xen-shell,v 1.2 2007-09-22 11:46:42 steve Exp $
 #
 
 
@@ -44,7 +44,7 @@ function _find_xen_images
 #
 _xen_shell()
 {
-    local cur prev ip roles dists vgs
+    local cur prev
 
     COMPREPLY=()
     cur=${COMP_WORDS[COMP_CWORD]}
