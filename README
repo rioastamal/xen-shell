@@ -25,8 +25,8 @@ xen-shell
   * Control their own reverse DNS entries.
   * View the bandwidth used by their guest(s).
 
-  Full help is available, and command completion is in place for the
- basic primitives (although not the optional arguments).
+  Full help is available, and command completion provided for the
+ basic commands (although not the optional arguments).
 
 
 
@@ -66,7 +66,7 @@ Specifying Hosts
 
   The xen shell allows a user to control multiple Xen guests.  To specify
  which host a user can control you should ensure that your xen configuration
- files, (located within the directory /etc/xen), contain the following:
+ files, (located beneat /etc/xen by default), contain the following:
 
    name      = 'my.host.name'
    xen_shell = 'bob, steve, skx'
@@ -91,6 +91,11 @@ Support
 
     http://steve.org.uk/donate/
 
+  If you wish to be listed as a user of the software and recieve a link
+ upon the homepage please do let me know if you're using this commercially.
+ As a software author it is very nice to track the spread and use of
+ my software.
+
   Bug reports/suggestions can be sent to the author.
 
 
@@ -103,7 +108,7 @@ Optional Features
 
    1.  Reverse DNS support.
    2.  Reimaging support.
-   3.  Bandwidth display
+   3.  Bandwidth display.
 
   Each of these things requires the support of external tools, and
  configuration.   If the shell detects that this support is not enabled
@@ -160,8 +165,8 @@ Optional Features
 
    1.  The vnstat package installed.
 
-   2.  The primary network interface for each guest named after
-      the name of the guest.
+   2.  The primary network interface for each guest named identically
+      to the guest.
 
   For example if you have the guest named 'skx' then inside the
  Xen configuration file you should have something like this:
