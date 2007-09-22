@@ -215,7 +215,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.101 2007-09-22 11:54:52 steve Exp $
+ $Id: xen-shell,v 1.102 2007-09-22 12:01:52 steve Exp $
 
 =cut
 
@@ -247,7 +247,7 @@ use Pod::Usage;
 # release number.
 #
 my $RELEASE   = 'UNRELEASED';
-my $VERSION   = '$Revision: 1.101 $';
+my $VERSION   = '$Revision: 1.102 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -941,6 +941,7 @@ EOF
     - We remove "reimage" if ~/image.sh isn't present and executable.
     - We remove "passwd" if ~/.ssh/authorized_keys is present and non-empty.
     - We remove "list" + "control" if the user can only access one Xen guest.
+    - We remove any command blacklisted in /etc/xen-shell/xen-shell.conf
 
 =end doc
 
@@ -2190,7 +2191,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.101 2007-09-22 11:54:52 steve Exp $
+ $Id: xen-shell,v 1.102 2007-09-22 12:01:52 steve Exp $
 
 =cut
 
