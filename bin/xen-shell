@@ -215,7 +215,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.102 2007-09-22 12:01:52 steve Exp $
+ $Id: xen-shell,v 1.103 2007-09-22 12:04:11 steve Exp $
 
 =cut
 
@@ -247,7 +247,7 @@ use Pod::Usage;
 # release number.
 #
 my $RELEASE   = 'UNRELEASED';
-my $VERSION   = '$Revision: 1.102 $';
+my $VERSION   = '$Revision: 1.103 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -1117,9 +1117,14 @@ sub loadHistory
     my ( $term ) = ( @_ );
 
     #
-    #  Load the file, if it exists.
+    #  The name of the history file.
     #
-    my $file = $ENV{'HOME'} . "/" . ".xen-shell";
+    my $hist = $CONFIG{'history'} || ".xen-shell";
+
+    #
+    #  Load the file, if it exists, from the home directory.
+    #
+    my $file = $ENV{'HOME'} . "/" . $hist;
     if ( -e $file )
     {
         #
@@ -1452,7 +1457,11 @@ sub do_control
 
 sub do_exit
 {
-    my $file = $ENV{'HOME'} . "/" . ".xen-shell";
+    #
+    #  The name of the history file, inside the home directory.
+    #
+    my $hist = $CONFIG{'history'} || ".xen-shell";
+    my $file = $ENV{'HOME'} . "/" . $hist;
 
     #
     #  Save the history if the term module can.
@@ -2191,7 +2200,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.102 2007-09-22 12:01:52 steve Exp $
+ $Id: xen-shell,v 1.103 2007-09-22 12:04:11 steve Exp $
 
 =cut
 
