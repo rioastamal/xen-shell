@@ -215,7 +215,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.106 2007-09-24 21:25:46 steve Exp $
+ $Id: xen-shell,v 1.107 2007-09-24 21:27:48 steve Exp $
 
 =cut
 
@@ -247,7 +247,7 @@ use Pod::Usage;
 # release number.
 #
 my $RELEASE   = 'UNRELEASED';
-my $VERSION   = '$Revision: 1.106 $';
+my $VERSION   = '$Revision: 1.107 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -2156,7 +2156,21 @@ sub do_uptime
     }
     else
     {
-        print "Guest: Uptime not found for $ACTIVE\n";
+        #
+        #  Guest uptime not found?   Either :
+        #
+        #  1.  Guest not running.
+        #
+        #  2.  Bug
+        #
+        if ( isRunning( $ACTIVE ) )
+        {
+            print "Guest: Uptime not found for $ACTIVE\n";
+        }
+        else
+        {
+            print "Guest uptime unknown - guest not running!\n";
+        }
         return;
     }
 
@@ -2251,7 +2265,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.106 2007-09-24 21:25:46 steve Exp $
+ $Id: xen-shell,v 1.107 2007-09-24 21:27:48 steve Exp $
 
 =cut
 
