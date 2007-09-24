@@ -215,7 +215,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.105 2007-09-24 21:21:05 steve Exp $
+ $Id: xen-shell,v 1.106 2007-09-24 21:25:46 steve Exp $
 
 =cut
 
@@ -247,7 +247,7 @@ use Pod::Usage;
 # release number.
 #
 my $RELEASE   = 'UNRELEASED';
-my $VERSION   = '$Revision: 1.105 $';
+my $VERSION   = '$Revision: 1.106 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -2108,8 +2108,20 @@ sub do_uptime
     chomp( $host_uptime );
     print "Host : $host_uptime\n";
 
+    #
+    #  Info read from xm list.
+    #
     my $upTime    = "";
     my $startTime = "";
+
+    #
+    #  Seconds the guest has been up.
+    #
+    my $seconds = undef;
+
+    #
+    #  Find the uptime/start-time.
+    #
     my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
 
     open( RUNNING, $cmd . "|" );
@@ -2126,43 +2138,45 @@ sub do_uptime
     }
     close( RUNNING );
 
+
+    #
+    #  If the 'up_time' line was present then we'll save the seconds.
+    #
     if ( defined( $upTime ) && length( $upTime ) )
     {
-        my $days  = int($upTime/(24*60*60));
-        my $hours = ($upTime/(60*60))%24;
-        my $mins  = ($upTime/60)%60;
-        my $secs  = $upTime%60;
-
-        if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
-        if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
-        if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
-
-        print "Guest: $days days $hours:$mins:$secs\n";
+        $seconds = $upTime;
     }
     elsif ( defined ($startTime ) && length( $startTime ) )
     {
         #
-        #  Get the current time and calculate the seconds difference.
+        #  Get the seconds the guest has been up.
         #
         my $time = time;
-        my $secs = $time - $startTime;
-
-        my $days  = int($secs/(24*60*60));
-        my $hours = ($secs/(60*60))%24;
-        my $mins  = ($secs/60)%60;
-        my $secs  = $secs%60;
-
-        if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
-        if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
-        if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
-
-        print "Guest: $days days $hours:$mins:$secs\n";
+        $seconds = $time - $startTime;
     }
     else
     {
-
         print "Guest: Uptime not found for $ACTIVE\n";
+        return;
     }
+
+    #
+    #  Now parse the seconds into days/hours/minutes/seconds.
+    #
+    my $days  = int($seconds/(24*60*60));
+    my $hours = ($seconds/(60*60))%24;
+    my $mins  = ($seconds/60)%60;
+    my $secs  = $seconds%60;
+
+
+    #
+    #  Plural days?
+    #
+    my $plural = 's';
+    $plural = '' if ( $days == 1 );
+
+    print sprintf "Guest: %d day%s %02d:%02d:%02d\n",
+      $days, $plural, $hours, $mins, $secs;
 }
 
 
@@ -2237,7 +2251,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.105 2007-09-24 21:21:05 steve Exp $
+ $Id: xen-shell,v 1.106 2007-09-24 21:25:46 steve Exp $
 
 =cut
 
