@@ -21,13 +21,17 @@ xen-shell
 
   * Access the serial console of their guest(s).
   * Bootup & Shutdown their guest(s).
-  * Reimage their guests(s) to a new distribution..
-  * Control their own reverse DNS entries.
-  * View the bandwidth used by their guest(s).
+  * Reimage their guests(s) to a new distribution. [*]
+  * Control their own reverse DNS entries. [*]
+  * View the bandwidth used by their guest(s). [*]
 
   Full help is available, and command completion provided for the
  basic commands (although not the optional arguments).
 
+--
+[*] - Requires additinal software & configuration.  See the later section
+      titled "Optional Features"
+--
 
 
 Installation
@@ -38,8 +42,9 @@ Installation
   Once installed set the login shell for each user you wish to use the
  shell to be: /usr/bin/xen-login-shell
 
-  You'll need to ensure that these users can run "xm" as root with
- no password, via sudo:
+  You'll also need to ensure that users who you wish to allow to use
+ the shell have the ability to run "xm" as root with no password, via
+ sudo:
 
 
 # /etc/sudoers
@@ -103,7 +108,7 @@ Support
 Optional Features
 -----------------
 
-  The shell contains several "optional" features which may be disabled,
+  The shell contains several optional features which may be disabled,
  or which may not work depending upon your environtment.  These are:
 
    1.  Reverse DNS support.
