@@ -6,7 +6,7 @@
 #
 # Steve
 # --
-# $Id: xen-login-shell,v 1.7 2007-03-01 15:36:28 steve Exp $
+# $Id: xen-login-shell,v 1.8 2007-09-24 21:35:03 steve Exp $
 
 
 #
@@ -42,6 +42,7 @@ done
 if [ -z "${screenrc}" ]; then
     echo "Could not find our custom GNU Screen configuration file"
     echo "Aborting"
+    sleep 5
     exit
 fi
 
@@ -70,6 +71,7 @@ done
 if [ -z "${xs}" ]; then
     echo "Could not find the xen-shell in the directories we searched."
     echo "Aborting"
+    sleep 5
     exit
 fi
 
