@@ -215,7 +215,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.104 2007-09-22 12:10:13 steve Exp $
+ $Id: xen-shell,v 1.105 2007-09-24 21:21:05 steve Exp $
 
 =cut
 
@@ -247,7 +247,7 @@ use Pod::Usage;
 # release number.
 #
 my $RELEASE   = 'UNRELEASED';
-my $VERSION   = '$Revision: 1.104 $';
+my $VERSION   = '$Revision: 1.105 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -2108,7 +2108,8 @@ sub do_uptime
     chomp( $host_uptime );
     print "Host : $host_uptime\n";
 
-    my $seconds = "";
+    my $upTime    = "";
+    my $startTime = "";
     my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
 
     open( RUNNING, $cmd . "|" );
@@ -2116,17 +2117,40 @@ sub do_uptime
     {
         if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
         {
-            $seconds= $1;
+            $upTime= $1;
+        }
+        if ( $line =~ /\(start_time[ \t]*([0-9]+)/ )
+        {
+            $startTime= $1;
         }
     }
     close( RUNNING );
 
-    if ( defined( $seconds ) && length( $seconds ) )
+    if ( defined( $upTime ) && length( $upTime ) )
     {
-        my $days  = int($seconds/(24*60*60));
-        my $hours = ($seconds/(60*60))%24;
-        my $mins  = ($seconds/60)%60;
-        my $secs  = $seconds%60;
+        my $days  = int($upTime/(24*60*60));
+        my $hours = ($upTime/(60*60))%24;
+        my $mins  = ($upTime/60)%60;
+        my $secs  = $upTime%60;
+
+        if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
+        if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
+        if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
+
+        print "Guest: $days days $hours:$mins:$secs\n";
+    }
+    elsif ( defined ($startTime ) && length( $startTime ) )
+    {
+        #
+        #  Get the current time and calculate the seconds difference.
+        #
+        my $time = time;
+        my $secs = $time - $startTime;
+
+        my $days  = int($secs/(24*60*60));
+        my $hours = ($secs/(60*60))%24;
+        my $mins  = ($secs/60)%60;
+        my $secs  = $secs%60;
 
         if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
         if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
@@ -2136,6 +2160,7 @@ sub do_uptime
     }
     else
     {
+
         print "Guest: Uptime not found for $ACTIVE\n";
     }
 }
@@ -2212,7 +2237,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.104 2007-09-22 12:10:13 steve Exp $
+ $Id: xen-shell,v 1.105 2007-09-24 21:21:05 steve Exp $
 
 =cut
 
