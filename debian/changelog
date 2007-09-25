@@ -1,3 +1,15 @@
+xen-shell (1.7-1) unstable; urgency=low
+
+  * New upstream release:
+    - Restores --control to working order.
+    - Show uptime of guests even on "recent" Xen systems.
+    - Avoid terminating before showing even more error messages.
+    - Allow admin to specify a different filename for history storing.
+    - Cause history to be saved even in an unclean shutdown.
+    - Added correct version ;)
+
+ -- Steve Kemp <skx@debian.org>  Tue, 25 Sep 2007 19:54:31 +0000
+
 xen-shell (1.6-1) unstable; urgency=low
 
   * New upstream release:
