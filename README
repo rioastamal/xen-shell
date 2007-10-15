@@ -160,6 +160,10 @@ Optional Features
  untar/install/fix their installation.  Using the xen-tools package you
  can allow your users to install Sarge, CentOS, or Gentoo.
 
+  For an example of this reimaging support please run :
+
+        xen-shell --manual
+
 
 
 3. Bandwidth Viewing [Optional]
