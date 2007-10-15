@@ -140,8 +140,22 @@ xen-shell - Provide a console interface to control Xen guests.
    # Reimaging script for the user skx.
    #
 
-   xen-create-image --hostname=skx.xen-hosting.net --ip=1.2.3.4 \
-      --size=9.5Gb --swap=512Mb --memory=256Mb --force
+   # the instance to be reimaged will be passed upon the command line.
+   host=$1
+
+   # find the IP by grepping /etc/hosts.
+   ip=$(grep "$host" /etc/hosts|awk '{print $1}')
+
+   if [ ! -z "${ip}" ]; then
+
+      xen-create-image --hostname=$host --ip=$ip \
+      --size=9.5Gb --swap=512Mb --memory=256Mb --force \
+      --dist=etch
+   else
+
+      echo "IP address not found for guest $host - aborting"
+
+   fi
 
 =for example end
 
@@ -215,7 +229,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.107 2007-09-24 21:27:48 steve Exp $
+ $Id: xen-shell,v 1.108 2007-10-15 17:46:38 steve Exp $
 
 =cut
 
@@ -247,7 +261,7 @@ use Pod::Usage;
 # release number.
 #
 my $RELEASE   = 'UNRELEASED';
-my $VERSION   = '$Revision: 1.107 $';
+my $VERSION   = '$Revision: 1.108 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -2265,7 +2279,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.107 2007-09-24 21:27:48 steve Exp $
+ $Id: xen-shell,v 1.108 2007-10-15 17:46:38 steve Exp $
 
 =cut
 
