@@ -4,7 +4,7 @@
 #
 # Steve
 # --
-# $Id: xm-reimage,v 1.7 2007-03-01 15:36:29 steve Exp $
+# $Id: xm-reimage,v 1.8 2007-10-15 17:44:15 steve Exp $
 #
 
 
@@ -17,6 +17,9 @@ if [ -z "${host}" ]; then
     exit
 fi
 
+#
+#  Get the user that we're invoked by.
+#
 user=$2
 if [ -z "${user}" ]; then
      echo "Usage: $0 host user"
@@ -27,8 +30,8 @@ fi
 #  Make sure that the image.sh script exists.  We shouldn't have been
 # called if that wasn't the case .. but ..
 #
-if [ ! -x /home/${user}/image.sh ]; then
-    echo "The user ${user} does not have an executable reimaging script"
+if [ ! -x "/home/${user}/image.sh" ]; then
+    echo "${user} does not have an executable reimaging script."
     exit
 fi
 
@@ -82,9 +85,9 @@ echo -e "\nCommitted."
 
 
 #
-#  Run the reimage script.
+#  Run the reimage script, with a single argument of the instance to reimage.
 #
-/home/${user}/image.sh
+/home/${user}/image.sh ${host}
 
 
 #
