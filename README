@@ -30,8 +30,24 @@ xen-shell
 
 --
 [*] - Requires additinal software & configuration.  See the later section
-      titled "Optional Features"
+      titled "Optional Features".  See also the manpage.
 --
+
+
+
+
+Documentation
+-------------
+
+  Once installed you can read the manual for the xen-shell by invoking:
+
+                xen-shell --manual
+
+  or
+
+                man xen-shell
+
+
 
 
 Installation
