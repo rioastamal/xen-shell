@@ -229,7 +229,7 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.108 2007-10-15 17:46:38 steve Exp $
+ $Id: xen-shell,v 1.109 2007-11-13 21:27:00 steve Exp $
 
 =cut
 
@@ -261,7 +261,7 @@ use Pod::Usage;
 # release number.
 #
 my $RELEASE   = 'UNRELEASED';
-my $VERSION   = '$Revision: 1.108 $';
+my $VERSION   = '$Revision: 1.109 $';
 if ( $VERSION =~ /1.([0-9.]+) / ) { $VERSION = $1; }
 
 
@@ -429,6 +429,12 @@ my %dispatch =
         sub => \&do_version,
         help => "Show the version of this shell, and of Xen.",
         info => "Show the version of this shell, and of Xen.",
+     },
+    "whoami" =>
+     {
+       sub  => \&do_whoami,
+       help => "Show the user you're connected as.",
+       info => "Show the user you're connected to the host system as.",
      },
   );
 
@@ -2259,7 +2265,18 @@ sub do_version
 
 
 
+=begin doc
 
+  Show the username of the currently connected user.
+
+=end doc
+
+=cut
+
+sub do_whoami
+{
+    print $USER . "\n";
+}
 
 
 #
@@ -2279,7 +2296,7 @@ END {
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.108 2007-10-15 17:46:38 steve Exp $
+ $Id: xen-shell,v 1.109 2007-11-13 21:27:00 steve Exp $
 
 =cut
 
