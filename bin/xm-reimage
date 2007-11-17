@@ -4,7 +4,7 @@
 #
 # Steve
 # --
-# $Id: xm-reimage,v 1.8 2007-10-15 17:44:15 steve Exp $
+# $Id: xm-reimage,v 1.9 2007-11-17 13:44:10 steve Exp $
 #
 
 
@@ -85,9 +85,10 @@ echo -e "\nCommitted."
 
 
 #
-#  Run the reimage script, with a single argument of the instance to reimage.
+#  Run the reimage script, with the instance name to reimage and the username
+# that it is owned by.
 #
-/home/${user}/image.sh ${host}
+/home/${user}/image.sh ${host} ${user}
 
 
 #
