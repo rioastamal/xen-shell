@@ -67,7 +67,6 @@ release: clean
 	rm -f $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz
 	cp -R . $(DIST_PREFIX)/$(BASE)-$(VERSION)
 	perl -pi -e "s/UNRELEASED/${VERSION}/g" $(DIST_PREFIX)/$(BASE)-$(VERSION)/bin/xen-shell
-	find  $(DIST_PREFIX)/$(BASE)-$(VERSION) -name "CVS" -print | xargs rm -rf
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)/debian
 	cd $(DIST_PREFIX) && tar --exclude=.cvsignore -cvf $(DIST_PREFIX)/$(BASE)-$(VERSION).tar $(BASE)-$(VERSION)/
 	gzip $(DIST_PREFIX)/$(BASE)-$(VERSION).tar
