@@ -232,8 +232,6 @@ xen-shell - Provide a console interface to control Xen guests.
  --
  http://www.steve.org.uk/
 
- $Id: xen-shell,v 1.110 2007-11-17 13:44:10 steve Exp $
-
 =cut
 
 
@@ -2295,8 +2293,6 @@ END {
  Steve
  --
  http://www.steve.org.uk/
-
- $Id: xen-shell,v 1.110 2007-11-17 13:44:10 steve Exp $
 
 =cut
 

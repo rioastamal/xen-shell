@@ -7,7 +7,6 @@
 # --
 # http://www.steve.org.uk/
 #
-# $Id: modules.sh,v 1.1 2006-11-21 11:29:54 steve Exp $
 #
 
 cat <<EOF

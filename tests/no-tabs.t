@@ -4,8 +4,7 @@
 #
 # Steve
 # --
-# $Id: no-tabs.t,v 1.2 2006-12-05 10:12:19 steve Exp $
-
+#
 
 use strict;
 use File::Find;

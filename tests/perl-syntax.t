@@ -4,7 +4,7 @@
 #
 # Steve
 # --
-# $Id: perl-syntax.t,v 1.1 2006-11-21 11:29:54 steve Exp $
+#
 
 
 use strict;
