@@ -11,11 +11,11 @@ all:
 	@echo "Usage:"
 	@echo " "
 	@echo " make clean   = Clean this directory recursively"
-	@echo " make diff    = Run a 'cvs diff'."
+	@echo " make diff    = View local changes."
 	@echo " make install = Install the software to /usr/local"
 	@echo " make remove  = Uninstall"
 	@echo " make release = Make a release tarball"
-	@echo " make update  = Update from the CVS repository."
+	@echo " make update  = Update from the master repository."
 	@echo " "
 
 
@@ -27,7 +27,7 @@ clean:
 
 
 diff:
-	cvs diff --unified 2>/dev/null
+	hg diff 2>/dev/null
 
 
 #
@@ -103,7 +103,7 @@ test-verbose:
 
 
 #
-#  Update from CVS repository
+#  Update from the master repository
 #
 update: 
-	cvs -z3 update -A -P -d 2>/dev/null
+	hg pull --update
