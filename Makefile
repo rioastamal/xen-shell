@@ -68,7 +68,8 @@ release: clean
 	cp -R . $(DIST_PREFIX)/$(BASE)-$(VERSION)
 	perl -pi -e "s/UNRELEASED/${VERSION}/g" $(DIST_PREFIX)/$(BASE)-$(VERSION)/bin/xen-shell
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)/debian
-	cd $(DIST_PREFIX) && tar --exclude=.cvsignore -cvf $(DIST_PREFIX)/$(BASE)-$(VERSION).tar $(BASE)-$(VERSION)/
+	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)/.hg*
+	cd $(DIST_PREFIX) && tar -cvf $(DIST_PREFIX)/$(BASE)-$(VERSION).tar $(BASE)-$(VERSION)/
 	gzip $(DIST_PREFIX)/$(BASE)-$(VERSION).tar
 	mv $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz .
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)
