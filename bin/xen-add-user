@@ -23,8 +23,8 @@ fi
 #
 if ( grep ${user} /etc/passwd > /dev/null ) ; then
     echo "Warning user ${user} already exists in the passwd file."
-    echo "Press return to proceed, or Ctrl-c to cancel."
-    read
+    echo "Aborting"
+    exit
 else
     echo "Creating new system user ${user}"
     /usr/sbin/useradd "${user}"
@@ -35,8 +35,8 @@ fi
 #
 if [ -d "/home/${user}" ]; then
     echo "Home directory already present.  Weird"
-    echo "Press return to proceed, or Ctrl-c to cancel."
-    read
+    echo "Aborting"
+    exit
 else
     echo "Making home directory for ${user}"
     mkdir "/home/${user}"
@@ -52,7 +52,7 @@ chown -R ${user}:users "/home/${user}"
 #  Create an SSH login key, so they can access the xen-shell
 #
 echo "Creating SSH key"
-echo -e "\n\n\n" | su -c "ssh-keygen -t dsa" ${user}
+/bin/echo -e "\n\n\n" | su -c "ssh-keygen -t dsa" ${user}
 
 
 #
