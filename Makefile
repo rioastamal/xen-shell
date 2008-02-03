@@ -11,11 +11,11 @@ all:
 	@echo "Usage:"
 	@echo " "
 	@echo " make clean   = Clean this directory recursively"
-	@echo " make diff    = View local changes."
+	@echo " make diff    = Run a 'cvs diff'."
 	@echo " make install = Install the software to /usr/local"
 	@echo " make remove  = Uninstall"
 	@echo " make release = Make a release tarball"
-	@echo " make update  = Update from the master repository."
+	@echo " make update  = Update from the CVS repository."
 	@echo " "
 
 
@@ -27,7 +27,7 @@ clean:
 
 
 diff:
-	hg diff 2>/dev/null
+	cvs diff --unified 2>/dev/null
 
 
 #
@@ -50,7 +50,7 @@ install: manpages
 
 
 makemanpages: clean
-	cd bin; for i in *-*; do pod2man --release=${VERSION} --official --section=8 $$i ../man/$$i.man; done
+	cd bin; for i in *-*; do pod2man --release=${VERSION} --official --section=1 $$i ../man/$$i.man; done
 
 
 
@@ -67,9 +67,9 @@ release: clean
 	rm -f $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz
 	cp -R . $(DIST_PREFIX)/$(BASE)-$(VERSION)
 	perl -pi -e "s/UNRELEASED/${VERSION}/g" $(DIST_PREFIX)/$(BASE)-$(VERSION)/bin/xen-shell
+	find  $(DIST_PREFIX)/$(BASE)-$(VERSION) -name "CVS" -print | xargs rm -rf
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)/debian
-	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)/.hg*
-	cd $(DIST_PREFIX) && tar -cvf $(DIST_PREFIX)/$(BASE)-$(VERSION).tar $(BASE)-$(VERSION)/
+	cd $(DIST_PREFIX) && tar --exclude=.cvsignore -cvf $(DIST_PREFIX)/$(BASE)-$(VERSION).tar $(BASE)-$(VERSION)/
 	gzip $(DIST_PREFIX)/$(BASE)-$(VERSION).tar
 	mv $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz .
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)
@@ -103,7 +103,7 @@ test-verbose:
 
 
 #
-#  Update from the master repository
+#  Update from CVS repository
 #
 update: 
-	hg pull --update
+	cvs -z3 update -A -P -d 2>/dev/null
