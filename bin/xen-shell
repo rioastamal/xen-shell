@@ -248,8 +248,6 @@ The LICENSE file contains the full text of the license.
 
 
 
-
-
 use strict;
 use warnings;
 use English;
@@ -260,7 +258,7 @@ use Pod::Usage;
 #
 #  Release number of this script.
 #
-my $RELEASE   = 'UNRELEASED';
+my $RELEASE = 'UNRELEASED';
 
 
 #
@@ -286,7 +284,6 @@ my %xenBlacklists;
 
 
 
-
 #
 #  Dispatch table which contains the mapping between the commands
 # we make available and the routine which implements that behaviour.
@@ -295,146 +292,135 @@ my %xenBlacklists;
 # commands help text.
 #
 #
-my %dispatch =
-  (
-   "bandwidth" =>
-     {
-        sub => \&do_bandwidth,
-       args => "[hourly|daily|weekly|monthly]",
-       help => "Show your bandwidth usage.",
-       info => "Show your bandwidth usage.",
-     },
-   "boot" =>
-     {
-        sub => \&do_boot,
-       help => "Start the Xen guest, if it is not running.",
-       info => "Boot the Xen guest.",
-     },
-   "control" =>
-     {
+my %dispatch = (
+    "bandwidth" => {
+                    sub  => \&do_bandwidth,
+                    args => "[hourly|daily|weekly|monthly]",
+                    help => "Show your bandwidth usage.",
+                    info => "Show your bandwidth usage.",
+    },
+    "boot" => {
+               sub  => \&do_boot,
+               help => "Start the Xen guest, if it is not running.",
+               info => "Boot the Xen guest.",
+    },
+    "control" => {
         sub => \&do_control,
-       help => "Take control of a particular instance.\nThis command makes all subsequent operations apply to the Xen instance specified.",
-       info => "Specify which Xen guest to control.",
-     },
-   "console" =>
-     {
+        help =>
+"Take control of a particular instance.\nThis command makes all subsequent operations apply to the Xen instance specified.",
+        info => "Specify which Xen guest to control.",
+    },
+    "console" => {
         sub => \&do_console,
-       help => "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
-       info => "Gain access to a Xen guest via the serial console.",
-     },
-   "exit" =>
-     {
-        sub => \&do_exit,
-       help => "Exit the shell.",
-       info => "Exit the shell.",
-     },
-   "help" =>
-     {
-        sub => \&do_help,
-       args => "[command]",
-       help => "Show help about the specified command, or all commands if no command is specified.",
-       info => "Show general, or command-specific, help information.",
-     },
-   "list" =>
-     {
+        help =>
+"Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
+        info => "Gain access to a Xen guest via the serial console.",
+    },
+    "exit" => {
+               sub  => \&do_exit,
+               help => "Exit the shell.",
+               info => "Exit the shell.",
+    },
+    "help" => {
+        sub  => \&do_help,
+        args => "[command]",
+        help =>
+"Show help about the specified command, or all commands if no command is specified.",
+        info => "Show general, or command-specific, help information.",
+    },
+    "list" => {
         sub => \&do_list,
-       help => "Show the names of the Xen instances you may control upon this host.",
-       info => "List Xen instances which you may control.",
-     },
-   "passwd" =>
-     {
-        sub => \&do_password,
-       help => "Change your login password.",
-       info => "Change the password used to access this host.",
-     },
-   "pause" =>
-     {
-        sub => \&do_pause,
-       help => "Pause your instance.",
-       info => "This will pause the Xen guest.",
-     },
-   "quit" =>   # Dupe: exit
-     {
-        sub => \&do_exit,
-       help => "Exit this shell.",
-       info => "Exit this shell.",
-     },
-   "reboot" =>
-     {
-        sub => \&do_reboot,
-       help => "Reboot the Xen guest.",
-       info => "Reboot the Xen guest.",
-     },
-   "rdns" =>
-     {
-       sub  => \&do_rdns,
-       args => "[ipaddress some.host.name]",
-       help => "Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
-       info => "Setup reverse DNS for allocated IP addresses",
-     },
-   "reimage" =>
-     {
+        help =>
+          "Show the names of the Xen instances you may control upon this host.",
+        info => "List Xen instances which you may control.",
+    },
+    "passwd" => {
+                 sub  => \&do_password,
+                 help => "Change your login password.",
+                 info => "Change the password used to access this host.",
+    },
+    "pause" => {
+                sub  => \&do_pause,
+                help => "Pause your instance.",
+                info => "This will pause the Xen guest.",
+    },
+    "quit" =>    # Dupe: exit
+      {
+        sub  => \&do_exit,
+        help => "Exit this shell.",
+        info => "Exit this shell.",
+      },
+    "reboot" => {
+                 sub  => \&do_reboot,
+                 help => "Reboot the Xen guest.",
+                 info => "Reboot the Xen guest.",
+    },
+    "rdns" => {
+        sub  => \&do_rdns,
+        args => "[ipaddress some.host.name]",
+        help =>
+"Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
+        info => "Setup reverse DNS for allocated IP addresses",
+    },
+    "reimage" => {
         sub => \&do_reimage,
-       help => "Erase a Xen guest and reinitialise it to a fresh installation of Sarge.",
-       info => "Reset your system to a pristine installation.",
-     },
-   "serial" => # Dupe: console
-     {
+        help =>
+"Erase a Xen guest and reinitialise it to a fresh installation of Sarge.",
+        info => "Reset your system to a pristine installation.",
+    },
+    "serial" =>    # Dupe: console
+      {
         sub => \&do_console,
-       help => "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
-       info => "Gain access to the Xen guest via the serial console.",
-     },
-   "shutdown" =>
-     {
-        sub => \&do_shutdown,
-       args => "[force]",
-       help => "Shutdown the Xen guest.\nIf the 'force' parameter is used then we'll forcibly terminate.",
-       info => "Shutdown the Xen guest.",
-     },
-   "status" =>
-     {
-        sub  => \&do_status,
-        help => "Show whether the Xen guest is running or not.",
-        info => "Show the status of the Xen guest.",
-     },
-   "sysreq" =>
-     {
+        help =>
+"Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
+        info => "Gain access to the Xen guest via the serial console.",
+      },
+    "shutdown" => {
+        sub  => \&do_shutdown,
+        args => "[force]",
+        help =>
+"Shutdown the Xen guest.\nIf the 'force' parameter is used then we'll forcibly terminate.",
+        info => "Shutdown the Xen guest.",
+    },
+    "status" => {
+                 sub  => \&do_status,
+                 help => "Show whether the Xen guest is running or not.",
+                 info => "Show the status of the Xen guest.",
+    },
+    "sysreq" => {
         sub  => \&do_sysreq,
         args => "[string]",
-        help => "Send a 'sysreq' keystroke to the guest.\nThis allows you to try to cleanly shutdown a hung instance, for example.",
+        help =>
+"Send a 'sysreq' keystroke to the guest.\nThis allows you to try to cleanly shutdown a hung instance, for example.",
         info => "Send a 'sysreq' keystroke to the guest.",
-     },
-   "top" =>
-     {
-        sub => \&do_top,
-       help => "Show the list of running instances, their CPU usage, etc.",
-       info => "Show system resource usage.",
-     },
-   "unpause" =>
-     {
-        sub => \&do_unpause,
-       help => "Unpause your instance, and start it running again.",
-       info => "This will unpause the Xen guest.",
-     },
-   "uptime" =>
-     {
-        sub  => \&do_uptime,
-        help => "Show the uptime of the host & guest systems.",
-        info => "Show the uptime information of your guest system and this host.",
-     },
-   "version" =>
-     {
-        sub => \&do_version,
-        help => "Show the version of this shell, and of Xen.",
-        info => "Show the version of this shell, and of Xen.",
-     },
-    "whoami" =>
-     {
-       sub  => \&do_whoami,
-       help => "Show the user you're connected as.",
-       info => "Show the user you're connected to the host system as.",
-     },
-  );
+    },
+    "top" => {
+            sub  => \&do_top,
+            help => "Show the list of running instances, their CPU usage, etc.",
+            info => "Show system resource usage.",
+    },
+    "unpause" => {
+                  sub  => \&do_unpause,
+                  help => "Unpause your instance, and start it running again.",
+                  info => "This will unpause the Xen guest.",
+    },
+    "uptime" => {
+            sub  => \&do_uptime,
+            help => "Show the uptime of the host & guest systems.",
+            info =>
+              "Show the uptime information of your guest system and this host.",
+    },
+    "version" => {
+                  sub  => \&do_version,
+                  help => "Show the version of this shell, and of Xen.",
+                  info => "Show the version of this shell, and of Xen.",
+    },
+    "whoami" => {
+                sub  => \&do_whoami,
+                help => "Show the user you're connected as.",
+                info => "Show the user you're connected to the host system as.",
+    },
+);
 
 
 
@@ -474,7 +460,7 @@ my $ACTIVE = '';
 #
 # Find the username of the user who invoked this script.
 #
-my $USER = getpwuid( $REAL_USER_ID );
+my $USER = getpwuid($REAL_USER_ID);
 
 
 
@@ -519,8 +505,9 @@ showBanner();
 #  If the user specified an initial machine to control then use it,
 # if possible.
 #
-$ACTIVE = $CONFIG{'control'} if ( defined( $CONFIG{'control'} ) &&
-                                  canControl( $CONFIG{'control'} ) );
+$ACTIVE = $CONFIG{'control'}
+  if ( defined( $CONFIG{'control'} )
+       && canControl( $CONFIG{'control'} ) );
 
 
 #
@@ -540,14 +527,14 @@ my $term = createTerminal();
 #
 #  Load any command history which might be present.
 #
-loadHistory( $term );
+loadHistory($term);
 
 
 
 #
 #  Run our command loop - note this never returns.
 #
-runMainLoop( $term );
+runMainLoop($term);
 
 
 
@@ -555,10 +542,6 @@ runMainLoop( $term );
 #  Never reached
 #
 exit;
-
-
-
-
 
 
 
@@ -572,24 +555,20 @@ exit;
 
 sub parseCommandLineArguments
 {
-    my $SHOW_HELP      = 0;
-    my $SHOW_MANUAL    = 0;
-    my $SHOW_VERSION   = 0;
+    my $SHOW_HELP    = 0;
+    my $SHOW_MANUAL  = 0;
+    my $SHOW_VERSION = 0;
 
     #
     #  Parse options.
     #
-    GetOptions(
-               "help",      \$SHOW_HELP,
-               "manual",    \$SHOW_MANUAL,
-               "version",   \$SHOW_VERSION,
-               "control=s", \$CONFIG{'control'},
-             );
+    GetOptions( "help", \$SHOW_HELP, "manual", \$SHOW_MANUAL, "version",
+                \$SHOW_VERSION, "control=s", \$CONFIG{'control'}, );
 
     pod2usage(1) if $SHOW_HELP;
-    pod2usage(-verbose => 2 ) if $SHOW_MANUAL;
+    pod2usage( -verbose => 2 ) if $SHOW_MANUAL;
 
-    if ( $SHOW_VERSION )
+    if ($SHOW_VERSION)
     {
         if ( $CONFIG{'banner'} )
         {
@@ -615,15 +594,15 @@ sub parseCommandLineArguments
 
 sub parseConfigurationFile
 {
-    my( $file ) = (@_);
+    my ($file) = (@_);
 
     #
     #  Make sure the file is specified + exists.
     #
-    return if ( ! -e $file );
+    return if ( !-e $file );
 
     open( FILE, "<", $file ) or die "Cannot read file '$file' - $!";
-    while (defined(my $line = <FILE>) )
+    while ( defined( my $line = <FILE> ) )
     {
         chomp $line;
 
@@ -631,7 +610,7 @@ sub parseConfigurationFile
         next if ( $line =~ /^([ \t]*)\#/ );
 
         # Skip blank lines
-        next if ( length( $line ) < 1 );
+        next if ( length($line) < 1 );
 
         # Strip trailing comments.
         if ( $line =~ /(.*)\#(.*)/ )
@@ -652,13 +631,12 @@ sub parseConfigurationFile
             $val =~ s/\s+$//;
 
             # Store value.
-            $CONFIG{ $key } = $val;
+            $CONFIG{$key} = $val;
         }
     }
 
-    close( FILE );
+    close(FILE);
 }
-
 
 
 
@@ -678,16 +656,18 @@ sub parseConfigurationFile
 
 sub sanityCheck
 {
+
     #
     #  Test we have the perl modules we need.
     #
-    BEGIN {
+    BEGIN
+    {
         eval {
             require Term::ReadLine;
             require Term::ReadLine::Gnu;
         };
-    };
-    if ( $@ )
+    }
+    if ($@)
     {
         print "Package 'Term::ReadLine::Gnu' not installed.\n";
         print "Aborting\n";
@@ -714,8 +694,8 @@ sub sanityCheck
     # look for suitable instances.
     #
     #
-    @INSTANCES = findInstancesFor( $USER );
-    if ( ! @INSTANCES || scalar( @INSTANCES ) < 1 )
+    @INSTANCES = findInstancesFor($USER);
+    if ( !@INSTANCES || scalar(@INSTANCES) < 1 )
     {
         print "User '$USER' doesn't have a Xen guest on this host.\n";
         print "Aborting\n";
@@ -727,13 +707,12 @@ sub sanityCheck
     #  If the user only has one instance under their control we'll
     # default to controlling that one.
     #
-    if ( scalar( @INSTANCES ) == 1 )
+    if ( scalar(@INSTANCES) == 1 )
     {
         $ACTIVE = $INSTANCES[0];
     }
 
 }
-
 
 
 
@@ -754,7 +733,7 @@ sub sanityCheck
 
 sub findInstancesFor
 {
-    my( $username ) = ( @_ );
+    my ($username) = (@_);
 
     # The results.
     my @results;
@@ -765,6 +744,7 @@ sub findInstancesFor
     # Process all files.
     foreach my $file ( sort( glob( $CONFIG{'pattern'} ) ) )
     {
+
         # skip non-files.
         next if ( -d $file );
 
@@ -774,17 +754,18 @@ sub findInstancesFor
         # open and read the file.
         open( CFG, "<", $file ) or die "Failed to open $file - $!";
         my @contents = <CFG>;
-        close( CFG);
+        close(CFG);
 
         # data parsed from the key=value format.
         my %settings = ();
 
         # process each line.
-        foreach my $line ( @contents )
+        foreach my $line (@contents)
         {
+
             # skip blank lines.
-            next if ( ! defined( $line ) || ! length( $line ) );
-            chomp( $line );
+            next if ( !defined($line) || !length($line) );
+            chomp($line);
 
             # look for lines of the form 'key = value'
             if ( $line =~ /^[ \t]*([^=]+)=(.*)$/ )
@@ -793,7 +774,7 @@ sub findInstancesFor
                 my $val = $2;
 
                 # can't happen?
-                next if ((!$key) || (!$val));
+                next if ( ( !$key ) || ( !$val ) );
 
                 # Strip leading and trailing whitespace.
                 $key =~ s/^\s+//;
@@ -813,8 +794,8 @@ sub findInstancesFor
         #
         #  Did we find a name matching the current login?
         #
-        if ( $settings{'name'} &&
-             lc( $settings{'name'} ) eq ( lc( $username ) ) )
+        if ( $settings{'name'}
+             && lc( $settings{'name'} ) eq ( lc($username) ) )
         {
             push( @results, $settings{'name'} );
         }
@@ -824,18 +805,20 @@ sub findInstancesFor
         #
         if ( $settings{'xen_shell'} )
         {
+
             # lower-case the admins
             $settings{'xen_shell'} = lc( $settings{'xen_shell'} );
 
             foreach my $potential ( split( /,/, $settings{'xen_shell'} ) )
             {
+
                 # trim leading and trailing whitespace.
                 $potential =~ s/^\s+//;
                 $potential =~ s/\s+$//;
 
                 # does it match?
-                if ( ( $potential eq ( lc( $username ) ) ) &&
-                     ( length( $username ) ) )
+                if (    ( $potential eq ( lc($username) ) )
+                     && ( length($username) ) )
                 {
                     push @results, $settings{'name'};
                 }
@@ -847,7 +830,8 @@ sub findInstancesFor
         #
         if ( ( $settings{'name'} ) && ( $settings{'xen_shell_blacklist'} ) )
         {
-            $xenBlacklists{$settings{'name'}} = $settings{'xen_shell_blacklist'};
+            $xenBlacklists{$settings{'name'}} =
+              $settings{'xen_shell_blacklist'};
         }
     }
 
@@ -881,7 +865,6 @@ EOF
 
 
 
-
 =begin doc
 
   Can the current user control the specified instance?
@@ -892,14 +875,13 @@ EOF
 
 sub canControl
 {
-    my( $inst ) = (@_);
+    my ($inst) = (@_);
 
     #
     #  Seach for the results
     #
-    return( grep /^\Q$inst\E$/i, @INSTANCES );
+    return ( grep /^\Q$inst\E$/i, @INSTANCES );
 }
-
 
 
 
@@ -919,10 +901,11 @@ sub canControl
 
 sub isControlling
 {
+
     #
     #  Make sure we have an active machine.
     #
-    if ( !length( $ACTIVE ) )
+    if ( !length($ACTIVE) )
     {
         print <<EOF;
 
@@ -943,15 +926,13 @@ EOF
     #  Sanity check - ensure the user can control the
     # selected instance.  This should never fail.
     #
-    return 0 if ( ! canControl( $ACTIVE ) );
+    return 0 if ( !canControl($ACTIVE) );
 
     #
     #  The user is OK to operate the relevant command
     #
     return 1;
 }
-
-
 
 
 
@@ -974,40 +955,41 @@ EOF
 
 sub removeCommands
 {
+
     #
     #  Bandwidth:  Remove this command unless there is at least one
     # instance which is setup correctly.
     #
     my $has_vnstat = 0;
-    foreach my $name ( @INSTANCES )
+    foreach my $name (@INSTANCES)
     {
         $has_vnstat = 1 if ( -e "/var/lib/vnstat/$name" );
     }
 
-    if ( ! $has_vnstat )
+    if ( !$has_vnstat )
     {
-        $dispatch{ 'bandwidth' } = undef;
-        delete( $dispatch{ 'bandwidth' } );
+        $dispatch{'bandwidth'} = undef;
+        delete( $dispatch{'bandwidth'} );
     }
 
     #
     #  reimage
     #
-    if ( ( ! -e "/home/$USER/image.sh" ) ||
-         ( ! -x "/home/$USER/image.sh" ) )
+    if (    ( !-e "/home/$USER/image.sh" )
+         || ( !-x "/home/$USER/image.sh" ) )
     {
-        $dispatch{ 'reimage' } = undef;
-        delete( $dispatch{ 'reimage' } );
+        $dispatch{'reimage'} = undef;
+        delete( $dispatch{'reimage'} );
     }
 
     #
     #  rdns
     #
-    if ( ( ! -e "/home/$USER/ips.txt" ) ||
-         ( ! -w "/home/$USER/ips.txt" ) )
+    if (    ( !-e "/home/$USER/ips.txt" )
+         || ( !-w "/home/$USER/ips.txt" ) )
     {
-        $dispatch{ 'rdns' } = undef;
-        delete( $dispatch{ 'rdns' } );
+        $dispatch{'rdns'} = undef;
+        delete( $dispatch{'rdns'} );
     }
 
     #
@@ -1015,28 +997,29 @@ sub removeCommands
     #
     if ( -s "/home/$USER/.ssh/authorized_keys" )
     {
-        $dispatch{ 'passwd' } = undef;
-        delete( $dispatch{ 'passwd' } );
+        $dispatch{'passwd'} = undef;
+        delete( $dispatch{'passwd'} );
     }
 
     #
     #  If the user can only control one instance then there is
     # no need for "control" and "list".
     #
-    if ( scalar( @INSTANCES ) < 2 )
+    if ( scalar(@INSTANCES) < 2 )
     {
-        $dispatch{ 'control' } = undef;
-        delete( $dispatch{ 'control' } );
+        $dispatch{'control'} = undef;
+        delete( $dispatch{'control'} );
 
-        $dispatch{ 'list' } = undef;
-        delete( $dispatch{ 'list' } );
+        $dispatch{'list'} = undef;
+        delete( $dispatch{'list'} );
     }
 
     #
     #  Remove globally blacklisted commands
     #
-    foreach my $banned (split( /,/, $CONFIG{'blacklist'} ) )
+    foreach my $banned ( split( /,/, $CONFIG{'blacklist'} ) )
     {
+
         # strip leading and trailing whitespace
         $banned =~ s/^\s+//;
         $banned =~ s/\s+$//;
@@ -1044,7 +1027,7 @@ sub removeCommands
         next if ( !length($banned) );
 
         # lowercase, because all our commands are.
-        $banned = lc( $banned );
+        $banned = lc($banned);
         $dispatch{$banned} = undef;
         delete( $dispatch{$banned} );
     }
@@ -1109,22 +1092,23 @@ sub createTerminal
     #
     #  Add all Xen instances the user can control if there are more than one.
     #
-    if ( scalar( @INSTANCES ) > 1 )
+    if ( scalar(@INSTANCES) > 1 )
     {
-        push @cmds, ( @INSTANCES );
+        push @cmds, (@INSTANCES);
     }
 
     #
     #  Add completion
     #
     my $attribs = $term->Attribs;
-    $attribs->{completion_entry_function} = $attribs->{list_completion_function};
-    $attribs->{completion_word}           = \@cmds;
+    $attribs->{completion_entry_function} =
+      $attribs->{list_completion_function};
+    $attribs->{completion_word} = \@cmds;
 
     #
     #  Return it
     #
-    return( $term );
+    return ($term);
 }
 
 
@@ -1139,7 +1123,7 @@ sub createTerminal
 
 sub loadHistory
 {
-    my ( $term ) = ( @_ );
+    my ($term) = (@_);
 
     #
     #  The name of the history file.
@@ -1152,16 +1136,16 @@ sub loadHistory
     my $file = $ENV{'HOME'} . "/" . $hist;
     if ( -e $file )
     {
+
         #
         #  Load the history if we can.
         #
         if ( UNIVERSAL::can( $term, 'ReadHistory' ) )
         {
-            $term->ReadHistory( $file );
+            $term->ReadHistory($file);
         }
     }
 }
-
 
 
 
@@ -1182,55 +1166,58 @@ sub loadHistory
 
 sub runMainLoop
 {
-    my ( $term ) = ( @_ );
+    my ($term) = (@_);
 
     #
     #  Prompt
     #
-    my $prompt = getPrompt();;
+    my $prompt = getPrompt();
 
     #
     #  Command loop.
     #
-    while ( defined (my $line = $term->readline($prompt) ) )
+    while ( defined( my $line = $term->readline($prompt) ) )
     {
+
         # Ignore empty lines.
-        next if ( !length( $line ) );
+        next if ( !length($line) );
 
         # Strip leading and trailing whitespace.
         $line =~ s/^\s+//;
         $line =~ s/\s+$//;
 
         # If we have arguments then split them up.
-        my ($word, @args) = split( /[ \t]/, $line );
+        my ( $word, @args ) = split( /[ \t]/, $line );
 
         # Lookup command in our dispatch table.
-        my $cmd = $lookupTable{ lc( $word ) };
+        my $cmd = $lookupTable{lc($word)};
 
-        if ( $cmd )
+        if ($cmd)
         {
+
             # Call the function with any arguments we might have.
             $cmd->{'sub'}->( join( " ", @args ) );
 
             # Add a successful line to our history, if we can.
             if ( UNIVERSAL::can( $term, 'add_history' ) )
             {
-                $term->add_history( $line );
+                $term->add_history($line);
             }
         }
         else
         {
+
             #
             #  We got a word which wasn't recognised as a command.
             # was it a hostname?
             #
-            if ( canControl( $word ) )
+            if ( canControl($word) )
             {
-                do_control( $word );
+                do_control($word);
             }
             else
             {
-                if ( defined( $word ) && length( $word ) )
+                if ( defined($word) && length($word) )
                 {
                     print "Unknown command: '$word' - type 'help' for help.\n";
                 }
@@ -1265,15 +1252,16 @@ sub runMainLoop
 
 sub getPrompt
 {
+
     #
     #  If there is only one instance then "xen-shell>".
     #
-    return "xen-shell> " if ( scalar( @INSTANCES ) == 1 );
+    return "xen-shell> " if ( scalar(@INSTANCES) == 1 );
 
     #
     #  If there is an active instance then include that in the prompt.
     #
-    return "xen-shell[$ACTIVE]> " if ( length( $ACTIVE ) );
+    return "xen-shell[$ACTIVE]> " if ( length($ACTIVE) );
 
     #
     #  Otherwise the default.
@@ -1293,15 +1281,15 @@ sub getPrompt
 
 sub isRunning
 {
-    my( $name ) = ( @_ );
+    my ($name) = (@_);
 
     my $running = 0;
     my $cmd     = "sudo xm list $name 2>/dev/null | grep $name";
     my $out     = `$cmd`;
 
-    $running = 1 if ( ( $out ) && length( $out ) );
+    $running = 1 if ( ($out) && length($out) );
 
-    return( $running );
+    return ($running);
 }
 
 
@@ -1326,15 +1314,16 @@ sub isRunning
 
 sub do_bandwidth
 {
+
     # optional reporting period
-    my( $period ) = ( @_ );
+    my ($period) = (@_);
 
     my $arg = "--months";
 
     #
     #  See if we got a match
     #
-    if ( defined( $period ) )
+    if ( defined($period) )
     {
         $arg = "--hours"  if ( lc($period) eq "hourly" );
         $arg = "--days"   if ( lc($period) eq "daily" );
@@ -1346,7 +1335,7 @@ sub do_bandwidth
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     #
     #  A user might have N instances, of which only one might
@@ -1354,7 +1343,7 @@ sub do_bandwidth
     #
     if ( -e "/var/lib/vnstat/$ACTIVE" )
     {
-        system( "vnstat -i $ACTIVE $arg\n" );
+        system("vnstat -i $ACTIVE $arg\n");
     }
     else
     {
@@ -1374,19 +1363,19 @@ sub do_bandwidth
 
 sub do_boot
 {
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     print "Booting instance: $ACTIVE\n";
 
-    system( "sudo xm create $ACTIVE.cfg" );
+    system("sudo xm create $ACTIVE.cfg");
 
     print "Use 'console' to see the bootup messages.\n";
 }
-
 
 
 
@@ -1400,20 +1389,21 @@ sub do_boot
 
 sub do_console
 {
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     print "\nRunning console for $ACTIVE - exit with Ctrl+]\n";
-    print "(You might need to press return a couple of times to see activity.)\n\n";
+    print
+      "(You might need to press return a couple of times to see activity.)\n\n";
 
-    system( "sudo xm console $ACTIVE" );
+    system("sudo xm console $ACTIVE");
 
     print "\n";
 }
-
 
 
 
@@ -1427,12 +1417,12 @@ sub do_console
 
 sub do_control
 {
-    my ( $inst ) = ( @_ );
+    my ($inst) = (@_);
 
     #
     #  Make sure we got an instance.
     #
-    if ( !defined( $inst ) || !length( $inst ) )
+    if ( !defined($inst) || !length($inst) )
     {
         print "Usage: control instanceName\n";
         return;
@@ -1442,18 +1432,20 @@ sub do_control
     #
     #  If the user can control that instance then switch to it.
     #
-    if ( canControl( $inst ) )
+    if ( canControl($inst) )
     {
         print "Controlling: $inst\n";
-        $ACTIVE = $inst;
+        $ACTIVE      = $inst;
         %lookupTable = %dispatch;
+
         #
         #  Now remove any blacklisted commands, if we have any.
         #
         if ( $xenBlacklists{$inst} )
         {
-            foreach my $banned (split( /,/, $xenBlacklists{$inst} ) )
+            foreach my $banned ( split( /,/, $xenBlacklists{$inst} ) )
             {
+
                 # strip leading and trailing whitespace
                 $banned =~ s/^\s+//;
                 $banned =~ s/\s+$//;
@@ -1461,7 +1453,7 @@ sub do_control
                 next if ( !length($banned) );
 
                 # lowercase, because all our commands are.
-                $banned = lc( $banned );
+                $banned = lc($banned);
 
                 $lookupTable{$banned} = undef;
                 delete( $lookupTable{$banned} );
@@ -1470,10 +1462,10 @@ sub do_control
     }
     else
     {
-        print "The instance was not found, or you are not allowed to control it.\n";
+        print
+          "The instance was not found, or you are not allowed to control it.\n";
     }
 }
-
 
 
 
@@ -1487,6 +1479,7 @@ sub do_control
 
 sub do_exit
 {
+
     #
     #  The name of the history file, inside the home directory.
     #
@@ -1498,13 +1491,11 @@ sub do_exit
     #
     if ( UNIVERSAL::can( $term, 'WriteHistory' ) )
     {
-        $term->WriteHistory( $file );
+        $term->WriteHistory($file);
     }
 
     exit;
 }
-
-
 
 
 
@@ -1523,22 +1514,23 @@ sub do_exit
 
 sub do_help
 {
-    my ( $term ) = ( @_ );
+    my ($term) = (@_);
 
     #
     #  Help on a single command
     #
-    if ( ( defined( $term ) ) && ( length( $term ))  )
+    if ( ( defined($term) ) && ( length($term) ) )
     {
         foreach my $cmd ( split( /[ \t]/, $term ) )
         {
+
             # Lookup command in our dispatch table.
-            my $c = $dispatch{ lc( $cmd ) };
-            if ( $c )
+            my $c = $dispatch{lc($cmd)};
+            if ($c)
             {
                 my $args = $c->{'args'};
 
-                if ( !defined( $args ) ) { $args = ''; }
+                if ( !defined($args) ) { $args = ''; }
 
                 print "\nCommand: $cmd $args\n\n";
                 print $c->{'help'} . "\n";
@@ -1584,8 +1576,6 @@ sub do_help
 
 
 
-
-
 =begin doc
 
   Show the user the names of the Xen instances they may control.
@@ -1598,12 +1588,10 @@ sub do_list
 {
     print "You may control the following Xen instances:\n\n";
 
-    map( {print "\t$_\n" } @INSTANCES );
+    map( {print "\t$_\n"} @INSTANCES );
 
     print "\n(Use 'control' to take control of a particular instance.)\n";
 }
-
-
 
 
 
@@ -1620,7 +1608,7 @@ sub do_list
 
 sub do_password
 {
-    system( "passwd" );
+    system("passwd");
 }
 
 
@@ -1635,15 +1623,16 @@ sub do_password
 
 sub do_pause
 {
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     print "Pausing instance: $ACTIVE\n";
 
-    system( "sudo xm pause $ACTIVE" );
+    system("sudo xm pause $ACTIVE");
 
 }
 
@@ -1659,17 +1648,17 @@ sub do_pause
 
 sub do_reboot
 {
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     print "Rebooting instance: $ACTIVE\n";
 
-    system( "sudo xm reboot $ACTIVE" );
+    system("sudo xm reboot $ACTIVE");
 }
-
 
 
 
@@ -1686,7 +1675,7 @@ sub do_reboot
 
 sub do_reimage
 {
-    if (! -x "/home/$USER/image.sh" )
+    if ( !-x "/home/$USER/image.sh" )
     {
         print "There is no reimaging script for user $USER\n";
         print "Skipping.\n";
@@ -1698,14 +1687,14 @@ sub do_reimage
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     print "Reimaging instance: $ACTIVE\n";
 
     #
     # See if the instance is running
     #
-    if ( isRunning( $ACTIVE ) )
+    if ( isRunning($ACTIVE) )
     {
         print "Xen guest running.\n";
         print "Please run 'shutdown' first\n";
@@ -1722,12 +1711,12 @@ sub do_reimage
     #
     if ( -x "/usr/bin/xm-reimage" )
     {
-        system( "/usr/bin/xm-reimage $ACTIVE $USER" );
+        system("/usr/bin/xm-reimage $ACTIVE $USER");
         print "You may now boot your installation\n";
     }
     elsif ( -x "/usr/local/bin/xm-reimage" )
     {
-        system( "/usr/local/bin/xm-reimage $ACTIVE $USER" );
+        system("/usr/local/bin/xm-reimage $ACTIVE $USER");
         print "You may now boot your installation\n";
     }
     else
@@ -1736,7 +1725,6 @@ sub do_reimage
         print "ERROR:  Please report this as a bug to your server admin.\n";
     }
 }
-
 
 
 
@@ -1755,17 +1743,18 @@ sub do_reimage
 
 sub do_rdns
 {
-    my ( $args ) = ( @_ );
+    my ($args) = (@_);
 
-    if ( !defined( $args ) || ( !length( $args ) ) )
+    if ( !defined($args) || ( !length($args) ) )
     {
+
         # No arguments just show the current IP setup.
         open( CURRENT, "<", "/home/$USER/ips.txt" ) or return;
-        while(<CURRENT>)
+        while (<CURRENT>)
         {
             print;
         }
-        close( CURRENT );
+        close(CURRENT);
         return;
     }
 
@@ -1794,9 +1783,9 @@ sub do_rdns
     my @lines;
 
     open( CURRENT, "<", "/home/$USER/ips.txt" ) or return;
-    while(<CURRENT>)
+    while (<CURRENT>)
     {
-        my $line      = $_;
+        my $line = $_;
         my ( $i, $h ) = split( /[ \t]/, $line );
         if ( $i eq $ip )
         {
@@ -1806,27 +1795,28 @@ sub do_rdns
 
         push @lines, $line;
     }
-    close( CURRENT );
+    close(CURRENT);
 
     #
     #  If we updated save the new details.
     #
-    if ( $updated )
+    if ($updated)
     {
         open( NEW, ">", "/home/$USER/ips.txt" );
-        foreach my $l ( @lines )
+        foreach my $l (@lines)
         {
             print NEW $l;
         }
-        close( NEW );
+        close(NEW);
         print "Set the reverse DNS for $ip to $host\n";
 
         #
         #  If we have a post-update command then we'll execute it.
         #
-        if ( defined( $CONFIG{'updatedns'} ) &&
-             length( $CONFIG{'updatedns'} ) )
+        if ( defined( $CONFIG{'updatedns'} )
+             && length( $CONFIG{'updatedns'} ) )
         {
+
             #
             #  The command we'll run.
             #
@@ -1843,10 +1833,11 @@ sub do_rdns
             #
             #  Run the potentially modified command.
             #
-            system( $cmd );
+            system($cmd );
         }
         else
         {
+
             #
             #  No command - we assume cron-fu will update the entries,
             # so we should tell the user to expect a wait.
@@ -1863,7 +1854,6 @@ sub do_rdns
 
 
 
-
 =begin doc
 
   Shutdown the instance.
@@ -1874,31 +1864,31 @@ sub do_rdns
 
 sub do_shutdown
 {
-    my ( $arg ) =  ( @_ );
+    my ($arg) = (@_);
 
     #
     #  Is this to be a forced shutdown?
     #
     my $force = 0;
-    $force    = 1 if ( defined( $arg ) && ( lc($arg) eq "force" ) );
+    $force = 1 if ( defined($arg) && ( lc($arg) eq "force" ) );
 
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     print "Shutting down instance: $ACTIVE\n";
-    system( "sudo xm shutdown $ACTIVE 2>/dev/null" );
+    system("sudo xm shutdown $ACTIVE 2>/dev/null");
 
     #
     #  If we're forcing then we want to make sure it is gone.
     #
-    if ( $force )
+    if ($force)
     {
         print "Waiting to see if the shutdown succeeded.\n";
 
-        my $running = isRunning( $ACTIVE );
+        my $running = isRunning($ACTIVE);
         my $count   = 9;
 
         #
@@ -1907,12 +1897,12 @@ sub do_shutdown
         #  Repeat a few times.
         #
         print "Waiting: ";
-        while( ( $count ) && ( $running ) )
+        while ( ($count) && ($running) )
         {
-            $running = isRunning( $ACTIVE );
+            $running = isRunning($ACTIVE);
 
             print "$count.. ";
-            sleep( 5 );
+            sleep(5);
 
             $count -= 1;
         }
@@ -1921,22 +1911,23 @@ sub do_shutdown
         #
         #  If it is *still* running then force it.
         #
-        if ( $running )
+        if ($running)
         {
             print "Still running.  Forcing the shutdown.\n";
 
             #
             #  Send the sysreqs
             #
-            do_sysreq( "reissuo" );
+            do_sysreq("reissuo");
 
-            sleep( 2 );
-            system( "xm destroy $ACTIVE 2>/dev/null" );
+            sleep(2);
+            system("xm destroy $ACTIVE 2>/dev/null");
 
             print "System terminated.\n";
         }
         else
         {
+
             #
             #  The shutdown busy-loop worked.
             #
@@ -1944,8 +1935,6 @@ sub do_shutdown
         }
     }
 }
-
-
 
 
 
@@ -1961,22 +1950,23 @@ sub do_shutdown
 
 sub do_status
 {
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     #
     #  Is the instance running?
     #
-    my $running = isRunning( $ACTIVE );
+    my $running = isRunning($ACTIVE);
 
 
     #
     # Show state.
     #
-    if ( $running )
+    if ($running)
     {
         print "Guest : Running\n";
 
@@ -1984,25 +1974,25 @@ sub do_status
         my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
 
         open( RUNNING, $cmd . "|" );
-        foreach my $line ( <RUNNING> )
+        foreach my $line (<RUNNING>)
         {
             if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
             {
-                $seconds= $1;
+                $seconds = $1;
             }
         }
-        close( RUNNING );
+        close(RUNNING);
 
-        if ( defined( $seconds ) && length( $seconds ) )
+        if ( defined($seconds) && length($seconds) )
         {
-            my $days  = int($seconds/(24*60*60));
-            my $hours = ($seconds/(60*60))%24;
-            my $mins  = ($seconds/60)%60;
-            my $secs  = $seconds%60;
+            my $days = int( $seconds / ( 24 * 60 * 60 ) );
+            my $hours = ( $seconds / ( 60 * 60 ) ) % 24;
+            my $mins  = ( $seconds / 60 ) % 60;
+            my $secs  = $seconds % 60;
 
-            if ( length( $hours ) < 2 ) { $hours = "0" . $hours ; }
-            if ( length( $mins ) < 2 )  { $mins  = "0" . $mins ; }
-            if ( length( $secs ) < 2 )  { $secs  = "0" . $secs ; }
+            if ( length($hours) < 2 ) { $hours = "0" . $hours; }
+            if ( length($mins) < 2 )  { $mins  = "0" . $mins; }
+            if ( length($secs) < 2 )  { $secs  = "0" . $secs; }
 
             print "Uptime: $days days $hours:$mins:$secs\n";
         }
@@ -2012,7 +2002,6 @@ sub do_status
         print "Guest: Shutdown\n";
     }
 }
-
 
 
 
@@ -2026,18 +2015,18 @@ sub do_status
 
 sub do_sysreq
 {
-    my( $string ) = ( @_ );
+    my ($string) = (@_);
 
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     #
     #  Make sure we recieved a key.
     #
-    if ( !defined( $string ) )
+    if ( !defined($string) )
     {
         print <<EOF;
 Usage: sysreq [string]
@@ -2052,13 +2041,14 @@ EOF
     #
     foreach my $letter ( split( //, $string ) )
     {
+
         #
         #  a-z + ? are the only valid keys we care about.
         #
         if ( $letter =~ /[a-z\?]/ )
         {
             print "Sending sysreq: $letter\n";
-            system( "sudo xm sysrq $ACTIVE $letter 2>/dev/null" );
+            system("sudo xm sysrq $ACTIVE $letter 2>/dev/null");
         }
     }
 }
@@ -2075,10 +2065,9 @@ EOF
 
 sub do_top
 {
-    system( "sudo xm top" );
-    system( "clear" );
+    system("sudo xm top");
+    system("clear");
 }
-
 
 
 
@@ -2092,15 +2081,16 @@ sub do_top
 
 sub do_unpause
 {
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
     print "Un-pausing instance: $ACTIVE\n";
 
-    system( "sudo xm unpause $ACTIVE" );
+    system("sudo xm unpause $ACTIVE");
 }
 
 
@@ -2115,15 +2105,16 @@ sub do_unpause
 
 sub do_uptime
 {
+
     #
     #  Make sure the user has selected an instance
     # they can control.
     #
-    return if ( ! isControlling() );
+    return if ( !isControlling() );
 
 
     my $host_uptime = `uptime`;
-    chomp( $host_uptime );
+    chomp($host_uptime);
     print "Host : $host_uptime\n";
 
     #
@@ -2140,32 +2131,33 @@ sub do_uptime
     #
     #  Find the uptime/start-time.
     #
-    my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
+    my $cmd = "sudo xm list --long $ACTIVE 2>/dev/null";
 
     open( RUNNING, $cmd . "|" );
-    foreach my $line ( <RUNNING> )
+    foreach my $line (<RUNNING>)
     {
         if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
         {
-            $upTime= $1;
+            $upTime = $1;
         }
         if ( $line =~ /\(start_time[ \t]*([0-9]+)/ )
         {
-            $startTime= $1;
+            $startTime = $1;
         }
     }
-    close( RUNNING );
+    close(RUNNING);
 
 
     #
     #  If the 'up_time' line was present then we'll save the seconds.
     #
-    if ( defined( $upTime ) && length( $upTime ) )
+    if ( defined($upTime) && length($upTime) )
     {
         $seconds = $upTime;
     }
-    elsif ( defined ($startTime ) && length( $startTime ) )
+    elsif ( defined($startTime) && length($startTime) )
     {
+
         #
         #  Get the seconds the guest has been up.
         #
@@ -2174,6 +2166,7 @@ sub do_uptime
     }
     else
     {
+
         #
         #  Guest uptime not found?   Either :
         #
@@ -2181,7 +2174,7 @@ sub do_uptime
         #
         #  2.  Bug
         #
-        if ( isRunning( $ACTIVE ) )
+        if ( isRunning($ACTIVE) )
         {
             print "Guest: Uptime not found for $ACTIVE\n";
         }
@@ -2195,10 +2188,10 @@ sub do_uptime
     #
     #  Now parse the seconds into days/hours/minutes/seconds.
     #
-    my $days  = int($seconds/(24*60*60));
-    my $hours = ($seconds/(60*60))%24;
-    my $mins  = ($seconds/60)%60;
-    my $secs  = $seconds%60;
+    my $days = int( $seconds / ( 24 * 60 * 60 ) );
+    my $hours = ( $seconds / ( 60 * 60 ) ) % 24;
+    my $mins  = ( $seconds / 60 ) % 60;
+    my $secs  = $seconds % 60;
 
 
     #
@@ -2210,7 +2203,6 @@ sub do_uptime
     print sprintf "Guest: %d day%s %02d:%02d:%02d\n",
       $days, $plural, $hours, $mins, $secs;
 }
-
 
 
 
@@ -2228,7 +2220,7 @@ sub do_version
     my $cmd = "sudo xm info 2>/dev/null";
 
     open( INFO, $cmd . "|" );
-    foreach my $line ( <INFO> )
+    foreach my $line (<INFO>)
     {
         if ( $line =~ /^xen_major.*: (.*)$/ )
         {
@@ -2243,7 +2235,7 @@ sub do_version
             $xen .= $1;
         }
     }
-    close( INFO );
+    close(INFO);
 
     if ( $CONFIG{'banner'} )
     {
@@ -2253,7 +2245,7 @@ sub do_version
     {
         print "xen-shell v$RELEASE";
     }
-    if ( length( $xen ) )
+    if ( length($xen) )
     {
         print " running on Xen version $xen";
     }
@@ -2280,11 +2272,10 @@ sub do_whoami
 #
 #  Print a newline or two on termination, just to make things prettier.
 #
-END {
+END
+{
     print "\n\n";
 }
-
-
 
 
 
