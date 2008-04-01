@@ -62,7 +62,7 @@ manpages: makemanpages
 #
 #  Make a new release tarball.
 #
-release: clean
+release: tidy clean
 	rm -rf $(DIST_PREFIX)/$(BASE)-$(VERSION)
 	rm -f $(DIST_PREFIX)/$(BASE)-$(VERSION).tar.gz
 	cp -R . $(DIST_PREFIX)/$(BASE)-$(VERSION)
@@ -103,7 +103,16 @@ test-verbose:
 
 
 #
+#  Tidy the code
+#
+tidy:
+	if [ -x /usr/bin/perltidy ]; then \
+	perltidy -b -nt -bt=2 -sbt=1 -bl  -mbl=3 -sbl -bbs -bbb -anl  -lp bin/xen-shell \
+	; fi
+
+
+#
 #  Update from CVS repository
 #
-update: 
+update:
 	cvs -z3 update -A -P -d 2>/dev/null
