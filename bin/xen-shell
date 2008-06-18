@@ -266,9 +266,9 @@ my $RELEASE = 'UNRELEASED';
 # default values.
 #
 my %CONFIG;
-$CONFIG{'pattern'}   = '/etc/xen/*';
-$CONFIG{'config'}    = '/etc/xen-shell/xen-shell.conf';
-$CONFIG{'blacklist'} = '';
+$CONFIG{ 'pattern' }   = '/etc/xen/*';
+$CONFIG{ 'config' }    = '/etc/xen-shell/xen-shell.conf';
+$CONFIG{ 'blacklist' } = '';
 
 
 #
@@ -294,15 +294,15 @@ my %xenBlacklists;
 #
 my %dispatch = (
     "bandwidth" => {
-                    sub  => \&do_bandwidth,
-                    args => "[hourly|daily|weekly|monthly]",
-                    help => "Show your bandwidth usage.",
-                    info => "Show your bandwidth usage.",
+                     sub  => \&do_bandwidth,
+                     args => "[hourly|daily|weekly|monthly]",
+                     help => "Show your bandwidth usage.",
+                     info => "Show your bandwidth usage.",
     },
     "boot" => {
-               sub  => \&do_boot,
-               help => "Start the Xen guest, if it is not running.",
-               info => "Boot the Xen guest.",
+                sub  => \&do_boot,
+                help => "Start the Xen guest, if it is not running.",
+                info => "Boot the Xen guest.",
     },
     "control" => {
         sub => \&do_control,
@@ -317,9 +317,9 @@ my %dispatch = (
         info => "Gain access to a Xen guest via the serial console.",
     },
     "exit" => {
-               sub  => \&do_exit,
-               help => "Exit the shell.",
-               info => "Exit the shell.",
+                sub  => \&do_exit,
+                help => "Exit the shell.",
+                info => "Exit the shell.",
     },
     "help" => {
         sub  => \&do_help,
@@ -335,14 +335,14 @@ my %dispatch = (
         info => "List Xen instances which you may control.",
     },
     "passwd" => {
-                 sub  => \&do_password,
-                 help => "Change your login password.",
-                 info => "Change the password used to access this host.",
+                  sub  => \&do_password,
+                  help => "Change your login password.",
+                  info => "Change the password used to access this host.",
     },
     "pause" => {
-                sub  => \&do_pause,
-                help => "Pause your instance.",
-                info => "This will pause the Xen guest.",
+                 sub  => \&do_pause,
+                 help => "Pause your instance.",
+                 info => "This will pause the Xen guest.",
     },
     "quit" =>    # Dupe: exit
       {
@@ -351,9 +351,9 @@ my %dispatch = (
         info => "Exit this shell.",
       },
     "reboot" => {
-                 sub  => \&do_reboot,
-                 help => "Reboot the Xen guest.",
-                 info => "Reboot the Xen guest.",
+                  sub  => \&do_reboot,
+                  help => "Reboot the Xen guest.",
+                  info => "Reboot the Xen guest.",
     },
     "rdns" => {
         sub  => \&do_rdns,
@@ -383,9 +383,9 @@ my %dispatch = (
         info => "Shutdown the Xen guest.",
     },
     "status" => {
-                 sub  => \&do_status,
-                 help => "Show whether the Xen guest is running or not.",
-                 info => "Show the status of the Xen guest.",
+                  sub  => \&do_status,
+                  help => "Show whether the Xen guest is running or not.",
+                  info => "Show the status of the Xen guest.",
     },
     "sysreq" => {
         sub  => \&do_sysreq,
@@ -400,9 +400,9 @@ my %dispatch = (
             info => "Show system resource usage.",
     },
     "unpause" => {
-                  sub  => \&do_unpause,
-                  help => "Unpause your instance, and start it running again.",
-                  info => "This will unpause the Xen guest.",
+                   sub  => \&do_unpause,
+                   help => "Unpause your instance, and start it running again.",
+                   info => "This will unpause the Xen guest.",
     },
     "uptime" => {
             sub  => \&do_uptime,
@@ -411,9 +411,9 @@ my %dispatch = (
               "Show the uptime information of your guest system and this host.",
     },
     "version" => {
-                  sub  => \&do_version,
-                  help => "Show the version of this shell, and of Xen.",
-                  info => "Show the version of this shell, and of Xen.",
+                   sub  => \&do_version,
+                   help => "Show the version of this shell, and of Xen.",
+                   info => "Show the version of this shell, and of Xen.",
     },
     "whoami" => {
                 sub  => \&do_whoami,
@@ -476,7 +476,7 @@ parseCommandLineArguments();
 #
 #  Parse our configuration file, if it exists.
 #
-parseConfigurationFile( $CONFIG{'config'} ) if ( -e $CONFIG{'config'} );
+parseConfigurationFile( $CONFIG{ 'config' } ) if ( -e $CONFIG{ 'config' } );
 
 
 
@@ -505,15 +505,15 @@ showBanner();
 #  If the user specified an initial machine to control then use it,
 # if possible.
 #
-$ACTIVE = $CONFIG{'control'}
-  if ( defined( $CONFIG{'control'} )
-       && canControl( $CONFIG{'control'} ) );
+$ACTIVE = $CONFIG{ 'control' }
+  if ( defined( $CONFIG{ 'control' } )
+       && canControl( $CONFIG{ 'control' } ) );
 
 
 #
 #  Setup a signal handler to make sure we save history at exit-time.
 #
-$SIG{INT} = "do_exit";
+$SIG{ INT } = "do_exit";
 
 
 #
@@ -562,17 +562,27 @@ sub parseCommandLineArguments
     #
     #  Parse options.
     #
-    GetOptions( "help", \$SHOW_HELP, "manual", \$SHOW_MANUAL, "version",
-                \$SHOW_VERSION, "control=s", \$CONFIG{'control'}, );
+    if (
+        !GetOptions(
+            "help",    \$SHOW_HELP,
+            "manual",  \$SHOW_MANUAL,
+            "version", \$SHOW_VERSION,
+
+            "control=s", \$CONFIG{ 'control' },
+        )
+      )
+    {
+        exit;
+    }
 
     pod2usage(1) if $SHOW_HELP;
     pod2usage( -verbose => 2 ) if $SHOW_MANUAL;
 
     if ($SHOW_VERSION)
     {
-        if ( $CONFIG{'banner'} )
+        if ( $CONFIG{ 'banner' } )
         {
-            print $CONFIG{'banner'} . "\n";
+            print $CONFIG{ 'banner' } . "\n";
         }
         else
         {
@@ -631,7 +641,7 @@ sub parseConfigurationFile
             $val =~ s/\s+$//;
 
             # Store value.
-            $CONFIG{$key} = $val;
+            $CONFIG{ $key } = $val;
         }
     }
 
@@ -742,7 +752,7 @@ sub findInstancesFor
     my $count = 0;
 
     # Process all files.
-    foreach my $file ( sort( glob( $CONFIG{'pattern'} ) ) )
+    foreach my $file ( sort( glob( $CONFIG{ 'pattern' } ) ) )
     {
 
         # skip non-files.
@@ -787,29 +797,29 @@ sub findInstancesFor
                 $val =~ s/['"]$//g;
 
                 # store
-                $settings{$key} = $val;
+                $settings{ $key } = $val;
             }
         }
 
         #
         #  Did we find a name matching the current login?
         #
-        if ( $settings{'name'}
-             && lc( $settings{'name'} ) eq ( lc($username) ) )
+        if ( $settings{ 'name' }
+             && lc( $settings{ 'name' } ) eq ( lc($username) ) )
         {
-            push( @results, $settings{'name'} );
+            push( @results, $settings{ 'name' } );
         }
 
         #
         # Did we find an admin user matching our current login.
         #
-        if ( $settings{'xen_shell'} )
+        if ( $settings{ 'xen_shell' } )
         {
 
             # lower-case the admins
-            $settings{'xen_shell'} = lc( $settings{'xen_shell'} );
+            $settings{ 'xen_shell' } = lc( $settings{ 'xen_shell' } );
 
-            foreach my $potential ( split( /,/, $settings{'xen_shell'} ) )
+            foreach my $potential ( split( /,/, $settings{ 'xen_shell' } ) )
             {
 
                 # trim leading and trailing whitespace.
@@ -820,7 +830,7 @@ sub findInstancesFor
                 if (    ( $potential eq ( lc($username) ) )
                      && ( length($username) ) )
                 {
-                    push @results, $settings{'name'};
+                    push @results, $settings{ 'name' };
                 }
             }
         }
@@ -828,10 +838,10 @@ sub findInstancesFor
         #
         #  Store the blacklist for the given guest name.
         #
-        if ( ( $settings{'name'} ) && ( $settings{'xen_shell_blacklist'} ) )
+        if ( ( $settings{ 'name' } ) && ( $settings{ 'xen_shell_blacklist' } ) )
         {
-            $xenBlacklists{$settings{'name'}} =
-              $settings{'xen_shell_blacklist'};
+            $xenBlacklists{ $settings{ 'name' } } =
+              $settings{ 'xen_shell_blacklist' };
         }
     }
 
@@ -859,7 +869,7 @@ EOF
     #   foo.cfg + foo.cfg~)
     #
     my %seen;
-    my @uniq = grep !$seen{$_}++, @results;
+    my @uniq = grep !$seen{ $_ }++, @results;
     return @uniq;
 }
 
@@ -968,8 +978,8 @@ sub removeCommands
 
     if ( !$has_vnstat )
     {
-        $dispatch{'bandwidth'} = undef;
-        delete( $dispatch{'bandwidth'} );
+        $dispatch{ 'bandwidth' } = undef;
+        delete( $dispatch{ 'bandwidth' } );
     }
 
     #
@@ -978,8 +988,8 @@ sub removeCommands
     if (    ( !-e "/home/$USER/image.sh" )
          || ( !-x "/home/$USER/image.sh" ) )
     {
-        $dispatch{'reimage'} = undef;
-        delete( $dispatch{'reimage'} );
+        $dispatch{ 'reimage' } = undef;
+        delete( $dispatch{ 'reimage' } );
     }
 
     #
@@ -988,8 +998,8 @@ sub removeCommands
     if (    ( !-e "/home/$USER/ips.txt" )
          || ( !-w "/home/$USER/ips.txt" ) )
     {
-        $dispatch{'rdns'} = undef;
-        delete( $dispatch{'rdns'} );
+        $dispatch{ 'rdns' } = undef;
+        delete( $dispatch{ 'rdns' } );
     }
 
     #
@@ -997,8 +1007,8 @@ sub removeCommands
     #
     if ( -s "/home/$USER/.ssh/authorized_keys" )
     {
-        $dispatch{'passwd'} = undef;
-        delete( $dispatch{'passwd'} );
+        $dispatch{ 'passwd' } = undef;
+        delete( $dispatch{ 'passwd' } );
     }
 
     #
@@ -1007,17 +1017,17 @@ sub removeCommands
     #
     if ( scalar(@INSTANCES) < 2 )
     {
-        $dispatch{'control'} = undef;
-        delete( $dispatch{'control'} );
+        $dispatch{ 'control' } = undef;
+        delete( $dispatch{ 'control' } );
 
-        $dispatch{'list'} = undef;
-        delete( $dispatch{'list'} );
+        $dispatch{ 'list' } = undef;
+        delete( $dispatch{ 'list' } );
     }
 
     #
     #  Remove globally blacklisted commands
     #
-    foreach my $banned ( split( /,/, $CONFIG{'blacklist'} ) )
+    foreach my $banned ( split( /,/, $CONFIG{ 'blacklist' } ) )
     {
 
         # strip leading and trailing whitespace
@@ -1028,8 +1038,8 @@ sub removeCommands
 
         # lowercase, because all our commands are.
         $banned = lc($banned);
-        $dispatch{$banned} = undef;
-        delete( $dispatch{$banned} );
+        $dispatch{ $banned } = undef;
+        delete( $dispatch{ $banned } );
     }
 
     #
@@ -1051,9 +1061,9 @@ sub removeCommands
 
 sub showBanner
 {
-    if ( $CONFIG{'banner'} )
+    if ( $CONFIG{ 'banner' } )
     {
-        print $CONFIG{'banner'} . "\n";
+        print $CONFIG{ 'banner' } . "\n";
     }
     else
     {
@@ -1101,9 +1111,9 @@ sub createTerminal
     #  Add completion
     #
     my $attribs = $term->Attribs;
-    $attribs->{completion_entry_function} =
-      $attribs->{list_completion_function};
-    $attribs->{completion_word} = \@cmds;
+    $attribs->{ completion_entry_function } =
+      $attribs->{ list_completion_function };
+    $attribs->{ completion_word } = \@cmds;
 
     #
     #  Return it
@@ -1128,12 +1138,12 @@ sub loadHistory
     #
     #  The name of the history file.
     #
-    my $hist = $CONFIG{'history'} || ".xen-shell";
+    my $hist = $CONFIG{ 'history' } || ".xen-shell";
 
     #
     #  Load the file, if it exists, from the home directory.
     #
-    my $file = $ENV{'HOME'} . "/" . $hist;
+    my $file = $ENV{ 'HOME' } . "/" . $hist;
     if ( -e $file )
     {
 
@@ -1190,13 +1200,13 @@ sub runMainLoop
         my ( $word, @args ) = split( /[ \t]/, $line );
 
         # Lookup command in our dispatch table.
-        my $cmd = $lookupTable{lc($word)};
+        my $cmd = $lookupTable{ lc($word) };
 
         if ($cmd)
         {
 
             # Call the function with any arguments we might have.
-            $cmd->{'sub'}->( join( " ", @args ) );
+            $cmd->{ 'sub' }->( join( " ", @args ) );
 
             # Add a successful line to our history, if we can.
             if ( UNIVERSAL::can( $term, 'add_history' ) )
@@ -1441,9 +1451,9 @@ sub do_control
         #
         #  Now remove any blacklisted commands, if we have any.
         #
-        if ( $xenBlacklists{$inst} )
+        if ( $xenBlacklists{ $inst } )
         {
-            foreach my $banned ( split( /,/, $xenBlacklists{$inst} ) )
+            foreach my $banned ( split( /,/, $xenBlacklists{ $inst } ) )
             {
 
                 # strip leading and trailing whitespace
@@ -1455,8 +1465,8 @@ sub do_control
                 # lowercase, because all our commands are.
                 $banned = lc($banned);
 
-                $lookupTable{$banned} = undef;
-                delete( $lookupTable{$banned} );
+                $lookupTable{ $banned } = undef;
+                delete( $lookupTable{ $banned } );
             }
         }
     }
@@ -1483,8 +1493,8 @@ sub do_exit
     #
     #  The name of the history file, inside the home directory.
     #
-    my $hist = $CONFIG{'history'} || ".xen-shell";
-    my $file = $ENV{'HOME'} . "/" . $hist;
+    my $hist = $CONFIG{ 'history' } || ".xen-shell";
+    my $file = $ENV{ 'HOME' } . "/" . $hist;
 
     #
     #  Save the history if the term module can.
@@ -1525,15 +1535,15 @@ sub do_help
         {
 
             # Lookup command in our dispatch table.
-            my $c = $dispatch{lc($cmd)};
+            my $c = $dispatch{ lc($cmd) };
             if ($c)
             {
-                my $args = $c->{'args'};
+                my $args = $c->{ 'args' };
 
-                if ( !defined($args) ) { $args = ''; }
+                if ( !defined($args) ) {$args = '';}
 
                 print "\nCommand: $cmd $args\n\n";
-                print $c->{'help'} . "\n";
+                print $c->{ 'help' } . "\n";
             }
             else
             {
@@ -1547,9 +1557,9 @@ sub do_help
     #
     #  Header
     #
-    if ( $CONFIG{'banner'} )
+    if ( $CONFIG{ 'banner' } )
     {
-        print $CONFIG{'banner'} . "\n";
+        print $CONFIG{ 'banner' } . "\n";
     }
     else
     {
@@ -1562,9 +1572,9 @@ sub do_help
     #
     foreach my $entry ( sort keys %dispatch )
     {
-        my $hash = $dispatch{$entry};
+        my $hash = $dispatch{ $entry };
 
-        print sprintf( "%10s - %s\n", $entry, $hash->{'info'} );
+        print sprintf( "%10s - %s\n", $entry, $hash->{ 'info' } );
     }
 
     #
@@ -1588,7 +1598,7 @@ sub do_list
 {
     print "You may control the following Xen instances:\n\n";
 
-    map( {print "\t$_\n"} @INSTANCES );
+    map( { print "\t$_\n" } @INSTANCES );
 
     print "\n(Use 'control' to take control of a particular instance.)\n";
 }
@@ -1813,14 +1823,14 @@ sub do_rdns
         #
         #  If we have a post-update command then we'll execute it.
         #
-        if ( defined( $CONFIG{'updatedns'} )
-             && length( $CONFIG{'updatedns'} ) )
+        if ( defined( $CONFIG{ 'updatedns' } )
+             && length( $CONFIG{ 'updatedns' } ) )
         {
 
             #
             #  The command we'll run.
             #
-            my $cmd = $CONFIG{'updatedns'};
+            my $cmd = $CONFIG{ 'updatedns' };
 
             #
             #  Does this need a file to be inserted into the command line?
@@ -1990,9 +2000,9 @@ sub do_status
             my $mins  = ( $seconds / 60 ) % 60;
             my $secs  = $seconds % 60;
 
-            if ( length($hours) < 2 ) { $hours = "0" . $hours; }
-            if ( length($mins) < 2 )  { $mins  = "0" . $mins; }
-            if ( length($secs) < 2 )  { $secs  = "0" . $secs; }
+            if ( length($hours) < 2 ) {$hours = "0" . $hours;}
+            if ( length($mins) < 2 )  {$mins  = "0" . $mins;}
+            if ( length($secs) < 2 )  {$secs  = "0" . $secs;}
 
             print "Uptime: $days days $hours:$mins:$secs\n";
         }
@@ -2237,9 +2247,9 @@ sub do_version
     }
     close(INFO);
 
-    if ( $CONFIG{'banner'} )
+    if ( $CONFIG{ 'banner' } )
     {
-        print $CONFIG{'banner'} . "\n";
+        print $CONFIG{ 'banner' } . "\n";
     }
     else
     {
