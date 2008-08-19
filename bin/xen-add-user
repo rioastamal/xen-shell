@@ -13,7 +13,7 @@
 #  Get the user we're to add
 #
 user=$1
-if [ -z "${user}" ]; then       
+if [ -z "${user}" ]; then
     echo "Usage: xen-add-user username"
     exit
 fi
@@ -52,7 +52,7 @@ chown -R ${user}:users "/home/${user}"
 #  Create an SSH login key, so they can access the xen-shell
 #
 echo "Creating SSH key"
-/bin/echo -e "\n\n\n" | su -c "ssh-keygen -t dsa" ${user}
+printf "\n\n\n\n" | su -c "ssh-keygen -t dsa" ${user}
 
 
 #
@@ -94,7 +94,7 @@ chown -R ${user}:users "/home/${user}"
 #  Warning
 #
 if ( grep /usr/sbin/xm /etc/sudoers 2>/dev/null >/dev/null ) ; then
-    
+
     #
     # OK
     #
