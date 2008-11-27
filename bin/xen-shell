@@ -301,7 +301,8 @@ my %dispatch = (
     },
     "boot" => {
                 sub  => \&do_boot,
-                help => "Start the Xen guest, if it is not running.",
+                help => "Start the Xen guest, if it is not running.\nIf the 'console' parameter is used then show the console immediately..",
+                args => "[console]",
                 info => "Boot the Xen guest.",
     },
     "control" => {
@@ -1373,6 +1374,13 @@ sub do_bandwidth
 
 sub do_boot
 {
+    my ($arg) = (@_);
+
+    #
+    #  Is this to be a forced shutdown?
+    #
+    my $console = 0;
+    $console    = 1 if ( defined($arg) && ( lc($arg) eq "console" ) );
 
     #
     #  Make sure the user has selected an instance
@@ -1382,9 +1390,16 @@ sub do_boot
 
     print "Booting instance: $ACTIVE\n";
 
-    system("sudo xm create $ACTIVE.cfg");
+    if ( $console )
+    {
+        system("sudo xm create $ACTIVE.cfg -c");
+    }
+    else
+    {
+        system("sudo xm create $ACTIVE.cfg");
+        print "Use 'console' to see the bootup messages.\n";
+    }
 
-    print "Use 'console' to see the bootup messages.\n";
 }
 
 
