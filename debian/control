@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Radu Spineanu <radu@debian.org>
 Uploaders: Steve Kemp <skx@debian.org>
 Build-Depends: debhelper (>= 4.0.0)
-Standards-Version: 3.7.3
+Standards-Version: 3.8.0
 Homepage: http://xen-tools.org/software/xen-shell
 
 Package: xen-shell
