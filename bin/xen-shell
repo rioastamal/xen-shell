@@ -1399,7 +1399,6 @@ sub do_boot
         system("sudo xm create $ACTIVE.cfg");
         print "Use 'console' to see the bootup messages.\n";
     }
-
 }
 
 
