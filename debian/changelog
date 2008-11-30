@@ -1,3 +1,11 @@
+xen-shell (1.9-1) unstable; urgency=low
+
+  * The "boot" command has a new option "console".
+  * Bumped standards versions to 3.8.0:
+    - No changes required
+
+ -- Steve Kemp <skx@debian.org>  Sun, 30 Nov 2008 15:55:51 +0000
+
 xen-shell (1.8-2) unstable; urgency=low
 
   * Removed bashisms in our scripts.
@@ -89,7 +97,7 @@ xen-shell (0.6-1) stable; urgency=low
     - improves detection of the correct guest.
     - changes versioning system.
     - works with non-GNU readline module.
- 
+
  -- Steve Kemp <steve@steve.org.uk>  Thu, 7 Dec 2006 16:29:02 +0000
 
 xen-shell (0.5-1) stable; urgency=low

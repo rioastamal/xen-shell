@@ -293,40 +293,39 @@ my %xenBlacklists;
 #
 #
 my %dispatch = (
-    "bandwidth" => {
-                     sub  => \&do_bandwidth,
+    "bandwidth" => { sub  => \&do_bandwidth,
                      args => "[hourly|daily|weekly|monthly]",
                      help => "Show your bandwidth usage.",
                      info => "Show your bandwidth usage.",
-    },
+                   },
     "boot" => {
-                sub  => \&do_boot,
-                help => "Start the Xen guest, if it is not running.\nIf the 'console' parameter is used then show the console immediately..",
-                args => "[console]",
-                info => "Boot the Xen guest.",
+        sub => \&do_boot,
+        help =>
+          "Start the Xen guest, if it is not running.\nIf the 'console' parameter is used then show the console immediately..",
+        args => "[console]",
+        info => "Boot the Xen guest.",
     },
     "control" => {
         sub => \&do_control,
         help =>
-"Take control of a particular instance.\nThis command makes all subsequent operations apply to the Xen instance specified.",
+          "Take control of a particular instance.\nThis command makes all subsequent operations apply to the Xen instance specified.",
         info => "Specify which Xen guest to control.",
     },
     "console" => {
         sub => \&do_console,
         help =>
-"Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
+          "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
         info => "Gain access to a Xen guest via the serial console.",
     },
-    "exit" => {
-                sub  => \&do_exit,
+    "exit" => { sub  => \&do_exit,
                 help => "Exit the shell.",
                 info => "Exit the shell.",
-    },
+              },
     "help" => {
         sub  => \&do_help,
         args => "[command]",
         help =>
-"Show help about the specified command, or all commands if no command is specified.",
+          "Show help about the specified command, or all commands if no command is specified.",
         info => "Show general, or command-specific, help information.",
     },
     "list" => {
@@ -335,64 +334,59 @@ my %dispatch = (
           "Show the names of the Xen instances you may control upon this host.",
         info => "List Xen instances which you may control.",
     },
-    "passwd" => {
-                  sub  => \&do_password,
+    "passwd" => { sub  => \&do_password,
                   help => "Change your login password.",
                   info => "Change the password used to access this host.",
-    },
-    "pause" => {
-                 sub  => \&do_pause,
+                },
+    "pause" => { sub  => \&do_pause,
                  help => "Pause your instance.",
                  info => "This will pause the Xen guest.",
-    },
+               },
     "quit" =>    # Dupe: exit
-      {
-        sub  => \&do_exit,
+      { sub  => \&do_exit,
         help => "Exit this shell.",
         info => "Exit this shell.",
       },
-    "reboot" => {
-                  sub  => \&do_reboot,
+    "reboot" => { sub  => \&do_reboot,
                   help => "Reboot the Xen guest.",
                   info => "Reboot the Xen guest.",
-    },
+                },
     "rdns" => {
         sub  => \&do_rdns,
         args => "[ipaddress some.host.name]",
         help =>
-"Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
+          "Setup Reverse DNS for allocated IP addresses.\n\nWhen called with no arguments show current reverse DNS details.",
         info => "Setup reverse DNS for allocated IP addresses",
     },
     "reimage" => {
         sub => \&do_reimage,
         help =>
-"Erase a Xen guest and reinitialise it to a fresh installation of Sarge.",
+          "Erase a Xen guest and reinitialise it to a fresh installation of Sarge.",
         info => "Reset your system to a pristine installation.",
     },
     "serial" =>    # Dupe: console
-      {
-        sub => \&do_console,
+      { sub => \&do_console,
         help =>
-"Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
+          "Connect to the serial console of the Xen instance using GNU Screen.\n\nTo exit the serial prompt type 'Ctrl+]'\nYou may instead exit screen with 'Ctrl+a k', or 'Ctrl+a d'.",
         info => "Gain access to the Xen guest via the serial console.",
       },
     "shutdown" => {
         sub  => \&do_shutdown,
         args => "[force]",
         help =>
-"Shutdown the Xen guest.\nIf the 'force' parameter is used then we'll forcibly terminate.",
+          "Shutdown the Xen guest.\nIf the 'force' parameter is used then we'll forcibly terminate.",
         info => "Shutdown the Xen guest.",
     },
-    "status" => {
-                  sub  => \&do_status,
+    "status" => { sub  => \&do_status,
                   help => "Show whether the Xen guest is running or not.",
                   info => "Show the status of the Xen guest.",
-    },
+                },
+    "author" => { sub => \&do_author, },
     "sysreq" => {
         sub  => \&do_sysreq,
         args => "[string]",
         help =>
-"Send a 'sysreq' keystroke to the guest.\nThis allows you to try to cleanly shutdown a hung instance, for example.",
+          "Send a 'sysreq' keystroke to the guest.\nThis allows you to try to cleanly shutdown a hung instance, for example.",
         info => "Send a 'sysreq' keystroke to the guest.",
     },
     "top" => {
@@ -400,22 +394,20 @@ my %dispatch = (
             help => "Show the list of running instances, their CPU usage, etc.",
             info => "Show system resource usage.",
     },
-    "unpause" => {
-                   sub  => \&do_unpause,
+    "unpause" => { sub  => \&do_unpause,
                    help => "Unpause your instance, and start it running again.",
                    info => "This will unpause the Xen guest.",
-    },
+                 },
     "uptime" => {
             sub  => \&do_uptime,
             help => "Show the uptime of the host & guest systems.",
             info =>
               "Show the uptime information of your guest system and this host.",
     },
-    "version" => {
-                   sub  => \&do_version,
+    "version" => { sub  => \&do_version,
                    help => "Show the version of this shell, and of Xen.",
                    info => "Show the version of this shell, and of Xen.",
-    },
+                 },
     "whoami" => {
                 sub  => \&do_whoami,
                 help => "Show the user you're connected as.",
@@ -507,8 +499,8 @@ showBanner();
 # if possible.
 #
 $ACTIVE = $CONFIG{ 'control' }
-  if ( defined( $CONFIG{ 'control' } )
-       && canControl( $CONFIG{ 'control' } ) );
+  if ( defined( $CONFIG{ 'control' } ) &&
+       canControl( $CONFIG{ 'control' } ) );
 
 
 #
@@ -570,8 +562,7 @@ sub parseCommandLineArguments
             "version", \$SHOW_VERSION,
 
             "control=s", \$CONFIG{ 'control' },
-        )
-      )
+                   ) )
     {
         exit;
     }
@@ -805,8 +796,8 @@ sub findInstancesFor
         #
         #  Did we find a name matching the current login?
         #
-        if ( $settings{ 'name' }
-             && lc( $settings{ 'name' } ) eq ( lc($username) ) )
+        if ( $settings{ 'name' } &&
+             lc( $settings{ 'name' } ) eq ( lc($username) ) )
         {
             push( @results, $settings{ 'name' } );
         }
@@ -828,8 +819,8 @@ sub findInstancesFor
                 $potential =~ s/\s+$//;
 
                 # does it match?
-                if (    ( $potential eq ( lc($username) ) )
-                     && ( length($username) ) )
+                if ( ( $potential eq ( lc($username) ) ) &&
+                     ( length($username) ) )
                 {
                     push @results, $settings{ 'name' };
                 }
@@ -986,8 +977,8 @@ sub removeCommands
     #
     #  reimage
     #
-    if (    ( !-e "/home/$USER/image.sh" )
-         || ( !-x "/home/$USER/image.sh" ) )
+    if ( ( !-e "/home/$USER/image.sh" ) ||
+         ( !-x "/home/$USER/image.sh" ) )
     {
         $dispatch{ 'reimage' } = undef;
         delete( $dispatch{ 'reimage' } );
@@ -996,8 +987,8 @@ sub removeCommands
     #
     #  rdns
     #
-    if (    ( !-e "/home/$USER/ips.txt" )
-         || ( !-w "/home/$USER/ips.txt" ) )
+    if ( ( !-e "/home/$USER/ips.txt" ) ||
+         ( !-w "/home/$USER/ips.txt" ) )
     {
         $dispatch{ 'rdns' } = undef;
         delete( $dispatch{ 'rdns' } );
@@ -1107,6 +1098,11 @@ sub createTerminal
     {
         push @cmds, (@INSTANCES);
     }
+
+    #
+    #  Remove the easter function.
+    #
+    @cmds = grep( !/^author$/, @cmds );
 
     #
     #  Add completion
@@ -1315,6 +1311,22 @@ sub isRunning
 
 
 
+
+=begin doc
+
+  Show the author.
+
+=end doc
+
+=cut
+
+sub do_author
+{
+    print "Steve Kemp <steve\@steve.org.uk>\n";
+}
+
+
+
 =begin doc
 
   Show your bandwidth usage.
@@ -1380,7 +1392,7 @@ sub do_boot
     #  Is this to be a forced shutdown?
     #
     my $console = 0;
-    $console    = 1 if ( defined($arg) && ( lc($arg) eq "console" ) );
+    $console = 1 if ( defined($arg) && ( lc($arg) eq "console" ) );
 
     #
     #  Make sure the user has selected an instance
@@ -1390,7 +1402,7 @@ sub do_boot
 
     print "Booting instance: $ACTIVE\n";
 
-    if ( $console )
+    if ($console)
     {
         system("sudo xm create $ACTIVE.cfg -c");
     }
@@ -1837,8 +1849,8 @@ sub do_rdns
         #
         #  If we have a post-update command then we'll execute it.
         #
-        if ( defined( $CONFIG{ 'updatedns' } )
-             && length( $CONFIG{ 'updatedns' } ) )
+        if ( defined( $CONFIG{ 'updatedns' } ) &&
+             length( $CONFIG{ 'updatedns' } ) )
         {
 
             #

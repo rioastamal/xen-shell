@@ -2,7 +2,7 @@
 #  Only used to build distribution tarballs.
 #
 DIST_PREFIX = ${TMP}
-VERSION     = 1.8
+VERSION     = 1.9
 BASE        = xen-shell
 
 
