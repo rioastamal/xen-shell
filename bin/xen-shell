@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 =head1 NAME
 
@@ -126,10 +126,13 @@ xen-shell - Provide a console interface to control Xen guests.
   The shell has a built-in "reimage" command which can be used by users
  to reinitialize their system.
 
-  The reimage command itself does nothing, it merely executes the file
- "image.sh" from the users home directory, it is assumed that you will
- write your own script - perhaps to invoke "xen-create-image" to do
- the real job.
+  The reimage command itself does nothing, it merely executes an
+ administrator-defined reimaging script.
+
+  xen-shell ships with an example script, xm-reimage, which expects a
+ script "image.sh" existing in the user's home directory, it is assumed
+ that you will write your own script - perhaps to invoke "xen-create-image"
+ to do the real job.
 
   A sample script, ~skx/image.sh, might look like this:
 
@@ -162,9 +165,6 @@ xen-shell - Provide a console interface to control Xen guests.
 
 =for example end
 
-  If ~$USER/image.sh doesn't exist, or isn't executable, this command
- will be disabled.
-
 =cut
 
 
@@ -175,7 +175,7 @@ xen-shell - Provide a console interface to control Xen guests.
  do this directly, instead the shell will manipulate a simple text file
  in a users home directory.
 
-  Create the file /home/$USER/ips.txt with contents of the following form:
+  Create the file $HOME/ips.txt with contents of the following form:
 
 =for example begin
 
@@ -254,6 +254,8 @@ use English;
 use Getopt::Long;
 use Pod::Usage;
 
+# Secure PATH for Taint
+$ENV{'PATH'}="/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin";
 
 #
 #  Release number of this script.
@@ -266,10 +268,14 @@ my $RELEASE = 'UNRELEASED';
 # default values.
 #
 my %CONFIG;
-$CONFIG{ 'pattern' }   = '/etc/xen/*';
-$CONFIG{ 'config' }    = '/etc/xen-shell/xen-shell.conf';
-$CONFIG{ 'blacklist' } = '';
-
+$CONFIG{ 'guestcfg_dir' }         = '/etc/xen/';
+$CONFIG{ 'guestcfg_suffix' }      = '.cfg';
+$CONFIG{ 'pattern' }              = $CONFIG{'guestcfg_dir'}.'/*';
+$CONFIG{ 'config' }               = '/etc/xen-shell/xen-shell.conf';
+$CONFIG{ 'blacklist' }            = '';
+$CONFIG{ 'allow_force_shutdown' } = 1;
+$CONFIG{ 'reimage_cmd'}           = '/usr/bin/xm-reimage';
+$CONFIG{ 'restore_cmd'}           = '/usr/bin/xm-restore';
 
 #
 #  Storage for the Xen configuration file(s) we've read.
@@ -364,6 +370,12 @@ my %dispatch = (
           "Erase a Xen guest and reinitialise it to a fresh installation of Sarge.",
         info => "Reset your system to a pristine installation.",
     },
+    "restore" => {
+        sub => \&do_restore,
+        help =>
+          "Recover from a backup.",
+        info => "Restore files to your system.",
+    },
     "serial" =>    # Dupe: console
       { sub => \&do_console,
         help =>
@@ -374,8 +386,15 @@ my %dispatch = (
         sub  => \&do_shutdown,
         args => "[force]",
         help =>
-          "Shutdown the Xen guest.\nIf the 'force' parameter is used then we'll forcibly terminate.",
+          "Shutdown the Xen guest."  . ($CONFIG{'allow_force_shutdown'}==1 && "\nIf the 'force' parameter is used then we'll forcibly terminate." ),
         info => "Shutdown the Xen guest.",
+    },
+    "sshkey" => {
+        sub  => \&do_sshkey,
+        args => "[ssh-key]",
+        help =>
+          "Submit a new SSH key to the server for public-key authentication.  Takes the OpenSSH-format key as an argument.",
+        info => "Configure SSH authentication.",
     },
     "status" => { sub  => \&do_status,
                   help => "Show whether the Xen guest is running or not.",
@@ -451,11 +470,19 @@ my $ACTIVE = '';
 
 
 #
-# Find the username of the user who invoked this script.
+# Find the username and homedir of the user who invoked this script.
 #
-my $USER = getpwuid($REAL_USER_ID);
+my @UENT = getpwuid($REAL_USER_ID);
+my $USER = $UENT[0];
+my $HOME = $UENT[7];
 
-
+# For security, we sanity-check the $HOME variable.
+for ($HOME) {
+    /^\s*$/ ||
+    /\.\./ || # No ..'s
+    /^\// || # Lets assume this is a unix filesystem
+    die 'Bad $HOME'; # Bad wolf... blowing down my $HOME
+}
 
 #
 #  Parse any command line arguments which might be present.
@@ -746,6 +773,7 @@ sub findInstancesFor
     # Process all files.
     foreach my $file ( sort( glob( $CONFIG{ 'pattern' } ) ) )
     {
+        print "TESTING: $file\n";
 
         # skip non-files.
         next if ( -d $file );
@@ -946,7 +974,6 @@ EOF
 
     - We remove "vnstat" if there is no bandwidth accounting.
     - We remove "rdns" if ~/ips.txt is missing or non-writable.
-    - We remove "reimage" if ~/image.sh isn't present and executable.
     - We remove "passwd" if ~/.ssh/authorized_keys is present and non-empty.
     - We remove "list" + "control" if the user can only access one Xen guest.
     - We remove any command blacklisted in /etc/xen-shell/xen-shell.conf
@@ -975,20 +1002,10 @@ sub removeCommands
     }
 
     #
-    #  reimage
-    #
-    if ( ( !-e "/home/$USER/image.sh" ) ||
-         ( !-x "/home/$USER/image.sh" ) )
-    {
-        $dispatch{ 'reimage' } = undef;
-        delete( $dispatch{ 'reimage' } );
-    }
-
-    #
     #  rdns
     #
-    if ( ( !-e "/home/$USER/ips.txt" ) ||
-         ( !-w "/home/$USER/ips.txt" ) )
+    if ( ( !-e $HOME."/ips.txt" ) ||
+         ( !-w $HOME."/ips.txt" ) )
     {
         $dispatch{ 'rdns' } = undef;
         delete( $dispatch{ 'rdns' } );
@@ -997,7 +1014,7 @@ sub removeCommands
     #
     #  Password changing isn't available if key-based auth is used.
     #
-    if ( -s "/home/$USER/.ssh/authorized_keys" )
+    if ( -s $HOME."/.ssh/authorized_keys" )
     {
         $dispatch{ 'passwd' } = undef;
         delete( $dispatch{ 'passwd' } );
@@ -1291,10 +1308,18 @@ sub isRunning
     my ($name) = (@_);
 
     my $running = 0;
-    my $cmd     = "sudo xm list $name 2>/dev/null | grep $name";
-    my $out     = `$cmd`;
+    my @cmd     = ('sudo','xm','list',$name,'|');
 
-    $running = 1 if ( ($out) && length($out) );
+    # Lovely taint.. making this nice and hard for us.
+    my $pid=open (CMD, @cmd);
+    if (defined($pid))
+    {
+	while (<CMD>)
+	{
+	    if ( /^$name\s+/ ) { $running=1; }
+	}
+    }
+    close CMD;
 
     return ($running);
 }
@@ -1402,13 +1427,15 @@ sub do_boot
 
     print "Booting instance: $ACTIVE\n";
 
+    my $filename=$CONFIG{'guestcfg_dir'}.'/'.$ACTIVE.$CONFIG{'guestcfg_suffix'};
+
     if ($console)
     {
-        system("sudo xm create $ACTIVE.cfg -c");
+        system('sudo','xm','create',$filename,'-c');
     }
     else
     {
-        system("sudo xm create $ACTIVE.cfg");
+        system('sudo','xm','create',$filename);
         print "Use 'console' to see the bootup messages.\n";
     }
 }
@@ -1696,14 +1723,58 @@ sub do_reboot
     system("sudo xm reboot $ACTIVE");
 }
 
+=begin doc
 
+  Allow the machine to be restored from a backup.
+
+=end doc
+
+=cut
+
+sub do_restore
+{
+    #
+    #  Make sure the user has selected an instance
+    # they can control.
+    #
+    return if ( !isControlling() );
+
+    print "Restoring instance: $ACTIVE\n";
+
+    #
+    # See if the instance is running
+    #
+    if ( isRunning($ACTIVE) )
+    {
+        print "Xen guest running.\n";
+        print "Please run 'shutdown' first\n";
+        return;
+    }
+    else
+    {
+        print "Machine not running, proceeding\n";
+    }
+
+
+    #
+    #  Run the xm-reimage
+    #
+    if ( -x $CONFIG{'restore_cmd'} )
+    {
+        system($CONFIG{'restore_cmd'},$ACTIVE,$USER);
+        print "You may now boot your installation\n";
+    }
+    else
+    {
+        print "ERROR:  restore script not found.\n";
+        print "ERROR:  Please report this as a bug to your server admin.\n";
+    }
+}
 
 =begin doc
 
   Allow the machine to be reinitialised to a fresh installation of
  their Xen guest.
-
-  This ultimately invokes ~$USER/image.sh to do the work.
 
 =end doc
 
@@ -1711,14 +1782,6 @@ sub do_reboot
 
 sub do_reimage
 {
-    if ( !-x "/home/$USER/image.sh" )
-    {
-        print "There is no reimaging script for user $USER\n";
-        print "Skipping.\n";
-        return;
-    }
-
-
     #
     #  Make sure the user has selected an instance
     # they can control.
@@ -1743,23 +1806,133 @@ sub do_reimage
 
 
     #
-    #  Run the xm-reimage, either from /usr/bin, or /usr/local/bin.
+    #  Run the xm-reimage
     #
-    if ( -x "/usr/bin/xm-reimage" )
+    if ( -x $CONFIG{'reimage_cmd'} )
     {
-        system("/usr/bin/xm-reimage $ACTIVE $USER");
-        print "You may now boot your installation\n";
-    }
-    elsif ( -x "/usr/local/bin/xm-reimage" )
-    {
-        system("/usr/local/bin/xm-reimage $ACTIVE $USER");
+        system($CONFIG{'reimage_cmd'},$ACTIVE,$USER);
         print "You may now boot your installation\n";
     }
     else
     {
-        print "ERROR:  'xm-reimage' not found.\n";
+        print "ERROR:  reimage script not found.\n";
         print "ERROR:  Please report this as a bug to your server admin.\n";
     }
+}
+
+=begin doc
+
+  Submit public key to the server for key-based SSH authentication.
+
+=end doc
+
+=cut
+
+sub do_sshkey
+{
+    my ($args) = (@_);
+
+    # If you build it, they will come.
+    # The .ssh directory must be created.
+    if ( ! -d $HOME."/.ssh" )
+    {
+    	mkdir $HOME."/.ssh", 0750;
+    }
+
+    if ( !defined($args) || ( !length($args) ) )
+    {
+    	print "Printing existing keys as no arguments specified.\n";
+
+        # No arguments just show the current SSH key.
+        open( CURRENT, "<", $HOME."/.ssh/authorized_keys" ) or return;
+        while (<CURRENT>)
+        {
+            print;
+        }
+        close(CURRENT);
+        return;
+    }
+
+
+    #
+    #  We have an agument.  Assume it is of the form:
+    #
+    #  sshkey [format] [base64] [comment*]
+    #  or practically: ssh-rsa ABCD skx@example.com
+    #
+    my ( $format, $base64, $comment ) = split( /[ \t]/, $args, 3 );
+
+    #
+    #  Test that the format is supported.
+    #
+    #  As of 12/08, all possible keys begin with the pattern
+    #  /^ssh-(rsa|dss)/ yet the format specification may be longer, such as
+    #  with the format "ssh-rsa-x509v3".  For this reason, we check
+    #  both, according to all formats defined at the time of this writing:
+    #
+    #   ssh-dss        REQUIRED    sign  no-cert Simple DSS
+    #   ssh-rsa        RECOMMENDED sign  no-cert Simple RSA
+    #   ssh-dss-x509v3 RECOMMENDED sign  cert    X.509 certificates (DSS)
+    #   ssh-rsa-x509v3 RECOMMENDED sign  cert    X.509 certificates (RSA)
+    #   ssh-dss-spki   OPTIONAL    sign  cert    SPKI certificates (DSS)
+    #   ssh-rsa-spki   OPTIONAL    sign  cert    SPKI certificates (RSA)
+    #   ssh-dss-pgp    OPTIONAL    sign  cert    OpenPGP certificates (DSS)
+    #   ssh-rsa-pgp    OPTIONAL    sign  cert    OpenPGP certificates (RSA)
+    #
+    if ( $format !~ /^ssh-(rsa|dss)/ )
+    {
+        print "The given key does not specify a supported key format.\n". \
+		"Keys must be formatted for OpenSSH.\n";
+        return;
+    }
+    if ( $format =~ /^ssh-(rsa|dss)-(.*)/ ) {
+    	$_=$2;
+	unless (/x509v3/ || /spki/ || /pgp/) {
+	    print "The given key specifies an unknown format.\n";
+	    return;
+	}
+    }
+
+    #
+    # Here we will drop entries identical or similar.
+    #
+    my @lines;
+
+    if ( -f $HOME."/.ssh/authorized_keys" )
+    {
+	open( CURRENT, "<", $HOME."/.ssh/authorized_keys" ) or return;
+	while (<CURRENT>)
+	{
+	    my $line = $_;
+	    my ( undef, $b, undef ) = split( /[ \t]/, $line, 3 );
+
+	    # Do the drop.
+	    unless ( $b eq $base64 )
+	    {
+		push @lines, $line;
+	    }
+	}
+	close(CURRENT);
+    }
+
+    # Add our new line to the file
+    push @lines,sprintf("%s %s %s\n", $format, $base64, $comment);
+
+    # Set our umask, saving the old one.
+    my $oldmask=umask 0027;
+
+    #
+    #  Save the new details.
+    #
+    open( NEW, ">", $HOME."/.ssh/authorized_keys" );
+    foreach my $l (@lines)
+    {
+	print NEW $l;
+    }
+    print "Updated the authorized_keys file for key $base64\n";
+
+    # Restore the umask
+    umask $oldmask;
 }
 
 
@@ -1785,7 +1958,7 @@ sub do_rdns
     {
 
         # No arguments just show the current IP setup.
-        open( CURRENT, "<", "/home/$USER/ips.txt" ) or return;
+        open( CURRENT, "<", $HOME."/ips.txt" ) or return;
         while (<CURRENT>)
         {
             print;
@@ -1818,7 +1991,7 @@ sub do_rdns
     my $updated = 0;
     my @lines;
 
-    open( CURRENT, "<", "/home/$USER/ips.txt" ) or return;
+    open( CURRENT, "<", $HOME."/ips.txt" ) or return;
     while (<CURRENT>)
     {
         my $line = $_;
@@ -1838,7 +2011,7 @@ sub do_rdns
     #
     if ($updated)
     {
-        open( NEW, ">", "/home/$USER/ips.txt" );
+        open( NEW, ">", $HOME."/ips.txt" );
         foreach my $l (@lines)
         {
             print NEW $l;
@@ -1863,7 +2036,7 @@ sub do_rdns
             #
             if ( $cmd =~ /\$FILE/ )
             {
-                $cmd =~ s/\$FILE/\/home\/$USER\/ips.txt/g;
+                $cmd =~ s/\$FILE/$HOME\/ips.txt/g;
             }
 
             #
@@ -1906,7 +2079,9 @@ sub do_shutdown
     #  Is this to be a forced shutdown?
     #
     my $force = 0;
-    $force = 1 if ( defined($arg) && ( lc($arg) eq "force" ) );
+    if ( $CONFIG{'allow_force_shutdown'} == 1 ) {
+	$force = 1 if ( defined($arg) && ( lc($arg) eq "force" ) );
+    }
 
     #
     #  Make sure the user has selected an instance
@@ -2007,9 +2182,9 @@ sub do_status
         print "Guest : Running\n";
 
         my $seconds = "";
-        my $cmd     = "sudo xm list --long $ACTIVE 2>/dev/null";
+        my @cmd     = ('sudo','xm','list','--long',$ACTIVE,'|');
 
-        open( RUNNING, $cmd . "|" );
+        open( RUNNING, @cmd );
         foreach my $line (<RUNNING>)
         {
             if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
