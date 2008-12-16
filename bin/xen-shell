@@ -277,6 +277,7 @@ $CONFIG{ 'allow_force_shutdown' } = 1;
 $CONFIG{ 'reimage_cmd'}           = '/usr/bin/xm-reimage';
 $CONFIG{ 'restore_cmd'}           = '/usr/bin/xm-restore';
 
+
 #
 #  Storage for the Xen configuration file(s) we've read.
 #
@@ -587,7 +588,7 @@ sub parseCommandLineArguments
             "help",    \$SHOW_HELP,
             "manual",  \$SHOW_MANUAL,
             "version", \$SHOW_VERSION,
-
+            "verbose", \$CONFIG{'verbose'},
             "control=s", \$CONFIG{ 'control' },
                    ) )
     {
@@ -773,7 +774,7 @@ sub findInstancesFor
     # Process all files.
     foreach my $file ( sort( glob( $CONFIG{ 'pattern' } ) ) )
     {
-        print "TESTING: $file\n";
+        $CONFIG{'verbose'} && print "Testing file $file\n" ;
 
         # skip non-files.
         next if ( -d $file );
