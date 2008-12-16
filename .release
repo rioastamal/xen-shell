@@ -5,7 +5,7 @@
 #   http://mybin.repository.steve.org.uk/
 #
 # Steve
-# -- 
+# --
 #
 
 #
@@ -23,6 +23,11 @@ pattern=xen-shell-[0-9].[0-9].tar.gz*
 #  Pattern for our GPG-signature.
 #
 signature=xen-shell-[0-9].[0-9].tar.gz.asc
+
+#
+#  Version number
+#
+version=.version
 
 #
 #  Upload location.
