@@ -1310,10 +1310,10 @@ sub isRunning
     my ($name) = (@_);
 
     my $running = 0;
-    my @cmd = ( 'sudo', 'xm', 'list', $name, '|' );
+    my @cmd = ( 'sudo', 'xm', 'list', $name );
 
     # Lovely taint.. making this nice and hard for us.
-    my $pid = open( CMD, @cmd );
+    my $pid = open( CMD, '-|', @cmd );
     if ( defined($pid) )
     {
         while (<CMD>)
@@ -2190,9 +2190,9 @@ sub do_status
         print "Guest : Running\n";
 
         my $seconds = "";
-        my @cmd = ( 'sudo', 'xm', 'list', '--long', $ACTIVE, '|' );
+        my @cmd = ( 'sudo', 'xm', 'list', '--long', $ACTIVE );
 
-        open( RUNNING, @cmd );
+        open( RUNNING, '-|', @cmd );
         foreach my $line (<RUNNING>)
         {
             if ( $line =~ /\(up_time[ \t]*([0-9]+)/ )
